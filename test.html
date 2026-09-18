@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>بطولة الصناديق والتكتيك الاحترافي ⚽</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-0: #050906; --bg-1: #0a120b; --bg-2: #101a11;
+    --gold: #ffc837; --lime: #5cff37; --red: #ff4d4d; --blue: #37c8ff;
+    --ink: #f0f5f0; --ink-dim: #8fa396;
+    --radius: 16px;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0; font-family: 'Cairo', sans-serif; color: var(--ink);
+    background: linear-gradient(180deg, var(--bg-0), var(--bg-1) 50%, var(--bg-2));
+    min-height: 100vh; display: flex; justify-content: center; overflow-x: hidden;
+  }
+  #app { width: 100%; max-width: 960px; padding: clamp(8px, 2vw, 20px); display: flex; flex-direction: column; position: relative; }
+  .screen { display: none; flex-direction: column; flex: 1; animation: fadeIn 0.35s ease-out; }
+  .screen.active { display: flex; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  .brand { text-align: center; margin-bottom: 12px; }
+  .brand h1 { margin: 0; font-size: clamp(20px, 4vw, 28px); font-weight: 900; color: var(--lime); text-shadow: 0 0 10px rgba(92,255,55,0.3); }
+
+  .setup-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  @media (min-width: 640px) { .setup-grid { grid-template-columns: 1fr 1fr; } }
+
+  .team-card { border-radius: var(--radius); padding: 14px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.5); }
+  input[type=text], select { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2); background: #111; color: #fff; font-family: inherit; margin-top: 4px; margin-bottom: 8px; font-size: 14px; }
+
+  .btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; border-radius: 12px; border: none; font-family: inherit; font-size: 15px; font-weight: 800; cursor: pointer; transition: 0.2s; }
+  .btn-primary { background: var(--lime); color: #000; box-shadow: 0 4px 12px rgba(92,255,55,0.2); }
+  .btn-primary:active { transform: scale(0.98); }
+  .btn-secondary { background: #222; color: #fff; border: 1px solid rgba(255,255,255,0.2); margin-top: 8px; }
+
+  .turn-banner { text-align: center; background: rgba(0,0,0,0.7); padding: 10px; border-radius: 14px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.15); }
+  .turn-banner h2 { margin: 0; font-size: 18px; }
+  .turn-banner p { margin: 2px 0 0; font-size: 12px; color: var(--ink-dim); }
+
+  .box-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  @media (min-width: 560px) { .box-grid { grid-template-columns: repeat(4, 1fr); } }
+  .box {
+    height: 95px; border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: #142217; border: 2px solid rgba(255,255,255,0.1); cursor: pointer; position: relative; transition: 0.25s;
+  }
+  .box .num { position: absolute; top: 4px; left: 8px; font-size: 10px; color: #777; }
+  .box .icon { font-size: 28px; }
+  .box .name { font-size: 12px; font-weight: bold; text-align: center; padding: 0 4px; }
+  .box .rating { font-size: 11px; color: var(--gold); }
+  .box.opened { background: #1c3b16; border-color: var(--lime); transform: scale(1.02); }
+  .box.missed { background: #1a1a1a; border-color: #333; opacity: 0.5; }
+
+  /* الملاعب التكتيكية */
+  .pitches-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+  @media (max-width: 460px) { .pitches-container { grid-template-columns: 1fr; } }
+  .pitch-wrapper { background: rgba(0,0,0,0.6); border-radius: 14px; padding: 8px; border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; align-items: center; }
+  .pitch-title { font-weight: bold; font-size: 13px; margin-bottom: 6px; text-align: center; }
+
+  .pitch {
+    width: 100%; max-width: 380px; aspect-ratio: 68 / 100; position: relative; overflow: hidden;
+    background: #183d19; border: 2px solid rgba(255,255,255,0.4); border-radius: 10px;
+    background-image: repeating-linear-gradient(0deg, transparent, transparent 10%, rgba(0,0,0,0.15) 10%, rgba(0,0,0,0.15) 20%);
+  }
+  .pitch::before { content:''; position:absolute; top:50%; left:0; right:0; height:1px; background:rgba(255,255,255,0.35); }
+  .pitch::after { content:''; position:absolute; top:50%; left:50%; width:17%; height:17%; transform:translate(-50%,-50%); border:1px solid rgba(255,255,255,0.35); border-radius:50%; }
+
+  .pmark { position:absolute; border:1px solid rgba(255,255,255,0.3); background: transparent; }
+  .pmark.pbox-top { top:0; left:20%; width:60%; height:15%; border-top:none; }
+  .pmark.pbox-bottom { bottom:0; left:20%; width:60%; height:15%; border-bottom:none; }
+  .pmark.goalbox-top { top:0; left:36%; width:28%; height:6%; border-top:none; }
+  .pmark.goalbox-bottom { bottom:0; left:36%; width:28%; height:6%; border-bottom:none; }
+  .dots-layer { position:absolute; inset:0; }
+
+  .player-dot {
+    position: absolute; transform: translate(-50%, 50%); display: flex; flex-direction: column; align-items: center;
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  .player-dot .node {
+    width: 22px; height: 22px; border-radius: 50%; background: var(--gold); color: #000;
+    font-size: 10px; font-weight: 900; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 8px rgba(0,0,0,0.8); border: 1.5px solid #fff;
+  }
+  .player-dot .p-name { font-size: 9px; background: rgba(0,0,0,0.85); color: #fff; padding: 1px 4px; border-radius: 4px; white-space: nowrap; margin-top: 2px; }
+  .player-dot.red-carded .node { background: var(--red); color: #fff; text-decoration: line-through; }
+  .player-dot.red-carded::before { content:'🟥'; position:absolute; top:-10px; right:-8px; font-size:11px; }
+
+  @keyframes dotPop {
+    0% { transform: translate(-50%, 50%) scale(0) rotate(-30deg); opacity: 0; }
+    55% { transform: translate(-50%, 50%) scale(1.4) rotate(10deg); opacity: 1; }
+    100% { transform: translate(-50%, 50%) scale(1) rotate(0deg); }
+  }
+  .player-dot.pop { animation: dotPop 0.55s cubic-bezier(.2,1.4,.4,1); }
+  .player-dot.pop .node { box-shadow: 0 0 16px 4px rgba(55,200,255,0.85); }
+
+  .dots-layer.swap-out { animation: swapOut 0.45s ease-in forwards; }
+  @keyframes swapOut {
+    0% { opacity: 1; transform: scale(1) rotate(0deg); }
+    100% { opacity: 0; transform: scale(0.35) rotate(18deg); }
+  }
+  #swap-flash {
+    position: fixed; inset: 0; pointer-events: none; z-index: 150; opacity: 0;
+    background: radial-gradient(circle, rgba(255,255,255,0.95), rgba(255,200,55,0.35) 45%, transparent 75%);
+  }
+  #swap-flash.active { animation: swapFlashAnim 0.65s ease-out; }
+  @keyframes swapFlashAnim { 0% { opacity: 0; } 18% { opacity: 1; } 100% { opacity: 0; } }
+  .pitch-wrapper.shaking { animation: pitchShake 0.5s ease-in-out; }
+  @keyframes pitchShake {
+    0%,100% { transform: translate(0,0); }
+    20% { transform: translate(-4px,3px); }
+    40% { transform: translate(4px,-3px); }
+    60% { transform: translate(-3px,-2px); }
+    80% { transform: translate(3px,2px); }
+  }
+
+  .coach-badge { font-size: 10px; background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 6px; margin-top: 6px; width: 100%; text-align: center; border: 1px dashed rgba(255,255,255,0.2); }
+
+  /* شاشة الـ VS */
+  .vs-container { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; margin: auto; padding: 20px 0; width: 100%; }
+  .vs-stage { display: flex; width: 100%; align-items: center; justify-content: center; gap: 4vw; position: relative; }
+  .vs-stage .pitch-wrapper { flex: 0 1 42%; max-width: 320px; min-width: 130px; }
+
+  .vs-badge-wrap { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 20; pointer-events: none; }
+  .vs-badge {
+    font-size: clamp(34px, 8vw, 54px); font-weight: 900; font-style: italic; color: var(--red);
+    text-shadow: 0 0 20px rgba(255,77,77,0.9), 0 0 45px rgba(255,200,55,0.6);
+    position: relative; display: block;
+    animation: vsSmash 0.7s cubic-bezier(.17,1.6,.4,1) both, vsShake 0.55s ease-in-out 0.75s 6, vsGlow 1.4s ease-in-out 1.4s infinite;
+  }
+  @keyframes vsSmash {
+    0% { transform: scale(6) rotate(-25deg); opacity: 0; }
+    45% { transform: scale(0.75) rotate(12deg); opacity: 1; }
+    65% { transform: scale(1.35) rotate(-8deg); }
+    82% { transform: scale(0.92) rotate(4deg); }
+    100% { transform: scale(1) rotate(0deg); }
+  }
+  @keyframes vsShake {
+    0%,100% { transform: translate(0,0) scale(1); }
+    20% { transform: translate(-5px,3px) scale(1.06); }
+    40% { transform: translate(5px,-3px) scale(0.96); }
+    60% { transform: translate(-4px,-2px) scale(1.05); }
+    80% { transform: translate(4px,2px) scale(0.98); }
+  }
+  @keyframes vsGlow {
+    0%,100% { text-shadow: 0 0 20px rgba(255,77,77,0.9), 0 0 45px rgba(255,200,55,0.6); }
+    50% { text-shadow: 0 0 34px rgba(255,77,77,1), 0 0 70px rgba(92,255,55,0.7); }
+  }
+
+  .clash-left { animation: slideFromLeftClash 0.75s cubic-bezier(0.2, 0.85, 0.25, 1) both; }
+  .clash-right { animation: slideFromRightClash 0.75s cubic-bezier(0.2, 0.85, 0.25, 1) both; }
+  @keyframes slideFromLeftClash { from { transform: translateX(-160%) rotate(-10deg); opacity: 0; } to { transform: translateX(0) rotate(0); opacity: 1; } }
+  @keyframes slideFromRightClash { from { transform: translateX(160%) rotate(10deg); opacity: 0; } to { transform: translateX(0) rotate(0); opacity: 1; } }
+
+  /* Match UI & Log */
+  .match-header { text-align: center; background: #000; padding: 14px; border-radius: 14px; border: 2px solid var(--lime); margin-bottom: 12px; }
+  .match-score { font-size: 30px; font-weight: 900; letter-spacing: 2px; margin: 4px 0; color: #fff; }
+  .match-timer { font-size: 18px; color: var(--red); font-weight: bold; }
+  .match-log { background: rgba(0,0,0,0.5); border-radius: 14px; padding: 10px; height: 260px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+  .log-item { padding: 8px 12px; border-radius: 8px; background: rgba(255,255,255,0.08); font-size: 13px; line-height: 1.5; display: flex; gap: 8px; align-items: center; animation: fadeIn 0.25s ease; }
+  .log-item.goal { background: rgba(92,255,55,0.15); border-right: 4px solid var(--lime); }
+  .log-item.save { background: rgba(255,77,77,0.15); border-right: 4px solid var(--red); }
+  .log-item.pen { background: rgba(255,200,55,0.2); border-right: 4px solid var(--gold); }
+
+  /* Ratings Grid */
+  .ratings-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 10px; }
+  @media (min-width: 560px) { .ratings-grid { grid-template-columns: 1fr 1fr; } }
+  .rating-card { background: rgba(0,0,0,0.6); padding: 8px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); font-size: 11px; }
+  .rating-row { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+
+  .toast { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); background: var(--gold); color: #000; padding: 10px 18px; border-radius: 30px; font-weight: bold; font-size: 13px; z-index: 999; display: none; box-shadow: 0 4px 15px rgba(0,0,0,0.5); text-align: center; }
+
+  .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 100; padding: 16px; }
+  .modal.active { display: flex; }
+  .modal-content { background: #141414; padding: 20px; border-radius: 16px; text-align: center; width: 100%; max-width: 400px; border: 1px solid var(--gold); animation: modalPop 0.4s cubic-bezier(.2,1.4,.4,1); }
+  @keyframes modalPop { from { transform: scale(0.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  #event-modal-content .emoji { font-size: 42px; }
+  #event-modal-content h2 { margin: 8px 0 4px; font-size: 19px; }
+  #event-modal-content p { margin: 0; color: #ccc; font-size: 13px; white-space: pre-line; line-height: 1.6; }
+
+  /* تأثيرات وتحريكات الأهداف والتصدي */
+  #fx-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 1000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .fx-ball { position: absolute; font-size: 70px; filter: drop-shadow(0 0 20px rgba(255,255,255,0.9)); z-index: 1001; }
+  .fx-text {
+    position: absolute; font-size: 26px; font-weight: 900; background: rgba(0,0,0,0.9);
+    padding: 8px 24px; border-radius: 30px; border: 2px solid var(--lime); color: var(--gold);
+    text-shadow: 0 0 12px var(--gold); z-index: 1002; white-space: nowrap;
+  }
+
+  @keyframes flyLTR {
+    0% { left: -100px; transform: scale(0.4) rotate(0deg); opacity: 0; }
+    20% { opacity: 1; }
+    100% { left: 110%; transform: scale(1.6) rotate(720deg); opacity: 1; }
+  }
+  .anim-ltr { animation: flyLTR 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+
+  @keyframes flyRTL {
+    0% { right: -100px; transform: scale(0.4) rotate(0deg); opacity: 0; }
+    20% { opacity: 1; }
+    100% { right: 110%; transform: scale(1.6) rotate(-720deg); opacity: 1; }
+  }
+  .anim-rtl { animation: flyRTL 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+
+  @keyframes popSave {
+    0% { transform: scale(0) rotate(-45deg); opacity: 0; }
+    50% { transform: scale(1.3) rotate(0deg); opacity: 1; }
+    70% { transform: scale(0.95); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .anim-save { animation: popSave 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.27) forwards; }
+  .save-cross { position: absolute; top: -12px; right: -12px; font-size: 55px; color: var(--red); text-shadow: 0 0 15px var(--red); }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div class="toast" id="toast"></div>
+  <div id="swap-flash"></div>
+  <div id="fx-overlay"></div>
+
+  <!-- 1. الشاشة الأولى: التشكيلات والفرق -->
+  <section class="screen active" id="screen-setup">
+    <div class="brand">
+      <h1>بطولة التكتيك والصناديق ⚽</h1>
+      <p style="font-size:12px; color:#aaa;">اختار الفرق والتكتيك وابدأ المزاد بدون جليتشات!</p>
+    </div>
+
+    <div class="setup-grid">
+      <div class="team-card">
+        <h3 style="margin:0; color:var(--blue); font-size:16px;">👈 الفريق الأول (على الشمال)</h3>
+        <input type="text" id="t1-name" value="الأهلي">
+        <select id="t1-fmt">
+          <option value="4-3-3">4-3-3 (هجومية)</option>
+          <option value="4-4-2">4-4-2 (متوازنة)</option>
+          <option value="4-2-3-1" selected>4-2-3-1 (تكتيكية)</option>
+          <option value="3-5-2">3-5-2 (وسط قوي)</option>
+        </select>
+      </div>
+
+      <div class="team-card">
+        <h3 style="margin:0; color:var(--gold); font-size:16px;">👉 الفريق الثاني (على اليمين)</h3>
+        <input type="text" id="t2-name" value="الزمالك">
+        <select id="t2-fmt">
+          <option value="4-3-3" selected>4-3-3 (هجومية)</option>
+          <option value="4-4-2">4-4-2 (متوازنة)</option>
+          <option value="4-2-3-1">4-2-3-1 (تكتيكية)</option>
+          <option value="3-5-2">3-5-2 (وسط قوي)</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" onclick="initDraft()">🚀 بدء المزاد والتشكيل Live</button>
+  </section>
+
+  <!-- 2. الشاشة الثانية: المزاد + الملاعب الحية -->
+  <section class="screen" id="screen-arena">
+    <div class="turn-banner">
+      <h2 id="turn-team-title">دور الفريق</h2>
+      <p id="turn-pos-desc">اختر لاعب...</p>
+    </div>
+
+    <div class="box-grid" id="boxes-container"></div>
+
+    <div id="deal-actions" style="display:none; margin-bottom:10px;">
+      <button class="btn btn-primary" id="btn-deal" onclick="acceptDeal()">🤝 Deal (تأكيد الاختيار)</button>
+    </div>
+
+    <div class="pitches-container">
+      <div class="pitch-wrapper">
+        <div class="pitch-title" id="p1-title" style="color:var(--blue);">الملعب الأيسر</div>
+        <div class="pitch" id="pitch-1">
+          <div class="pmark pbox-top"></div>
+          <div class="pmark pbox-bottom"></div>
+          <div class="pmark goalbox-top"></div>
+          <div class="pmark goalbox-bottom"></div>
+          <div class="dots-layer"></div>
+        </div>
+        <div class="coach-badge" id="coach-1">👨‍💼 المدرب: لم يحدد</div>
+      </div>
+      <div class="pitch-wrapper">
+        <div class="pitch-title" id="p2-title" style="color:var(--gold);">الملعب الأيمن</div>
+        <div class="pitch" id="pitch-2">
+          <div class="pmark pbox-top"></div>
+          <div class="pmark pbox-bottom"></div>
+          <div class="pmark goalbox-top"></div>
+          <div class="pmark goalbox-bottom"></div>
+          <div class="dots-layer"></div>
+        </div>
+        <div class="coach-badge" id="coach-2">👨‍💼 المدرب: لم يحدد</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. الشاشة الثالثة: شاشة الـ VS الاحترافية -->
+  <section class="screen" id="screen-vs">
+    <div class="brand">
+      <h1>مواجهة العمالقة ⚔️</h1>
+      <p style="font-size:13px; color:#bbb;">التشكيلات مكتملة وجاهزة للمباراة!</p>
+    </div>
+
+    <div class="vs-container">
+      <div class="vs-stage">
+        <div class="pitch-wrapper clash-left">
+          <div class="pitch-title" id="vs-t1-title" style="color:var(--blue);"></div>
+          <div class="pitch" id="vs-pitch-1"></div>
+        </div>
+
+        <div class="vs-badge-wrap"><div class="vs-badge">VS</div></div>
+
+        <div class="pitch-wrapper clash-right">
+          <div class="pitch-title" id="vs-t2-title" style="color:var(--gold);"></div>
+          <div class="pitch" id="vs-pitch-2"></div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" style="margin-top:20px; font-size:18px;" onclick="startMatch()">⚽ ابدأ المباراة الآن</button>
+    </div>
+  </section>
+
+  <!-- نافذة الأحداث المركزية -->
+  <div class="modal" id="event-modal">
+    <div class="modal-content" id="event-modal-content"></div>
+  </div>
+
+  <!-- 4. الشاشة الرابعة: المباراة والتعليق -->
+  <section class="screen" id="screen-match">
+    <div class="match-header">
+      <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:15px;">
+        <span id="m-team1">فريق 1</span>
+        <span id="m-team2">فريق 2</span>
+      </div>
+      <div class="match-score" id="m-score">0 - 0</div>
+      <div class="match-timer">⏱️ <span id="m-timer">0</span>'</div>
+    </div>
+
+    <div class="match-log" id="m-log"></div>
+
+    <div style="display:flex; gap:10px; margin-top:10px;">
+      <button class="btn btn-secondary" id="btn-skip-match" onclick="skipMatch()">⏩ تخطي سيناريو المباراة</button>
+      <button class="btn btn-primary" id="btn-show-results" style="display:none; background:var(--gold); color:#000;" onclick="showResultsScreen()">📊 عرض تقييمات اللاعبين ورجل المباراة</button>
+    </div>
+  </section>
+
+  <!-- 5. الشاشة الخامسة: التقييمات ورجل المباراة -->
+  <section class="screen" id="screen-results">
+    <div class="brand">
+      <h1 id="winner-banner">🏆 بطل المباراة</h1>
+      <p id="motm-banner" style="color:var(--gold); font-size:16px; font-weight:bold;"></p>
+    </div>
+
+    <h3>📊 تقييمات اللاعبين الفردية:</h3>
+    <div class="ratings-grid">
+      <div class="rating-card">
+        <h4 id="res-t1-name" style="margin:0 0 6px 0; color:var(--blue);"></h4>
+        <div id="res-t1-list"></div>
+      </div>
+      <div class="rating-card">
+        <h4 id="res-t2-name" style="margin:0 0 6px 0; color:var(--gold);"></h4>
+        <div id="res-t2-list"></div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" style="margin-top:15px;" onclick="location.reload()">🔄 مباراة جديدة</button>
+  </section>
+
+</div>
+
+<script>
+const DB = {
+  ATT: [
+    // --- نجوم (Good) - 100 لاعب ---
+    {n:"ليونيل ميسي", r:98, t:"good"}, {n:"كريستيانو رونالدو", r:100, t:"good"}, {n:"محمد صلاح", r:95, t:"good"},
+    {n:"كيليان مبابي", r:96, t:"good"}, {n:"إيرلينج هالاند", r:95, t:"good"}, {n:"كريم بنزيما", r:93, t:"good"},
+    {n:"فينيسيوس جونيور", r:94, t:"good"}, {n:"نيمار جونيور", r:92, t:"good"}, {n:"روبرت ليفاندوفسكي", r:93, t:"good"},
+    {n:"ساديو ماني", r:90, t:"good"}, {n:"هاري كين", r:93, t:"good"}, {n:"أنطوان جريزمان", r:91, t:"good"},
+    {n:"لاوتارو مارتينيز", r:89, t:"good"}, {n:"بوكايو ساكا", r:90, t:"good"}, {n:"رودريجو", r:88, t:"good"},
+    {n:"فيكتور أوسيمين", r:91, t:"good"}, {n:"هيون مين سون", r:90, t:"good"}, {n:"باولو ديبالا", r:88, t:"good"},
+    {n:"أنخيل دي ماريا", r:89, t:"good"}, {n:"عثمان ديمبيلي", r:91, t:"good"}, {n:"برناردو سيلفا", r:91, t:"good"},
+    {n:"فيل فودين", r:91, t:"good"}, {n:"رافائيل لياو", r:89, t:"good"}, {n:"جياكومو راسبادوري", r:82, t:"good"},
+    {n:"أوليفييه جيرو", r:85, t:"good"}, {n:"دوشان فلاهوفيتش", r:87, t:"good"}, {n:"كريستوفر نكونكو", r:88, t:"good"},
+    {n:"ماركوس راشفورد", r:86, t:"good"}, {n:"رياض محرز", r:89, t:"good"}, {n:"روبرتو فيرمينو", r:85, t:"good"},
+    {n:"تامي أبراهام", r:83, t:"good"}, {n:"ألكسندر لاكازيت", r:84, t:"good"}, {n:"جبريل جيسوس", r:86, t:"good"},
+    {n:"رحيم ستيرلينج", r:85, t:"good"}, {n:"تيمو فيرنر", r:82, t:"good"}, {n:"موسى ديابي", r:84, t:"good"},
+    {n:"داروين نونيز", r:85, t:"good"}, {n:"كودي خاكبو", r:84, t:"good"}, {n:"لويس دياز", r:87, t:"good"},
+    {n:"ديوغو جوتا", r:86, t:"good"}, {n:"ألفارو موراتا", r:84, t:"good"}, {n:"ماورو إيكاردي", r:83, t:"good"},
+    {n:"جيرارد مورينو", r:85, t:"good"}, {n:"ياجو أسباس", r:84, t:"good"}, {n:"سيرجي غنابري", r:86, t:"good"},
+    {n:"ليروي ساني", r:87, t:"good"}, {n:"كينغسلي كومان", r:86, t:"good"}, {n:"توماس مولر", r:87, t:"good"},
+    {n:"ماريو جوتزه", r:81, t:"good"}, {n:"إيفان توني", r:85, t:"good"}, {n:"أول واتكينز", r:86, t:"good"},
+    {n:"ألكسندر إسحاق", r:86, t:"good"}, {n:"نيكلاس فولكروج", r:83, t:"good"}, {n:"تشارلز دي كيتيلاري", r:81, t:"good"},
+    {n:"لويس مورييل", r:80, t:"good"}, {n:"دوفان زاباتا", r:81, t:"good"}, {n:"تشيرو إيموبيلي", r:86, t:"good"},
+    {n:"روميلو لوكاكو", r:85, t:"good"}, {n:"أندريا بيلوتي", r:80, t:"good"}, {n:"ماتيو بوليتانو", r:82, t:"good"},
+    {n:"دومينيك كالبرت ليوين", r:81, t:"good"}, {n:"كالوم ويلسون", r:82, t:"good"}, {n:"داني ويلبيك", r:78, t:"good"},
+    {n:"ميشيل أنطونيو", r:79, t:"good"}, {n:"جانلوكا سكاماكا", r:81, t:"good"}, {n:"أندريا بينامونتي", r:78, t:"good"},
+    {n:"سيرهو جيراسي", r:84, t:"good"}, {n:"دينيز أونداف", r:82, t:"good"}, {n:"فيكتور بونيفاس", r:84, t:"good"},
+    {n:"ناثان تيللا", r:79, t:"good"}, {n:"أمين عدلي", r:80, t:"good"}, {n:"جونزالو راموس", r:83, t:"good"},
+    {n:"راندال كولو مواني", r:84, t:"good"}, {n:"برادلي باركولا", r:82, t:"good"}, {n:"عثمان دياماندي", r:79, t:"good"},
+    {n:"ماركو أسينسيو", r:83, t:"good"}, {n:"إبراهيم دياز", r:84, t:"good"}, {n:"رودريغو دي بول", r:83, t:"good"},
+    {n:"أنخل كوريا", r:82, t:"good"}, {n:"ممفيس ديباي", r:82, t:"good"}, {n:"يانيك كاراسكو", r:81, t:"good"},
+    {n:"هيرفين لوزانو", r:80, t:"good"}, {n:"راؤول خيمينيز", r:79, t:"good"}, {n:"سردار أزمون", r:78, t:"good"},
+    {n:"مهدي طارمي", r:82, t:"good"}, {n:"إيلي واهي", r:79, t:"good"}, {n:"فلوريان توفان", r:77, t:"good"},
+    {n:"ديميتري باييت", r:80, t:"good"}, {n:"بافيتيمبي غوميز", r:76, t:"good"}, {n:"لورنزو إنسيني", r:81, t:"good"},
+    {n:"فيديريكو كييزا", r:86, t:"good"}, {n:"دومينيك سوبوسلاي", r:85, t:"good"}, {n:"ميكيل أويارزابال", r:84, t:"good"},
+    {n:"جيريمي دوكو", r:83, t:"good"}, {n:"سافييو", r:82, t:"good"}, {n:"كول بالمر", r:86, t:"good"},
+    {n:"فلوريان فيرتز", r:89, t:"good"}, {n:"عمر مرموش", r:85, t:"good"}, {n:"أرتيم دوفبيك", r:85, t:"good"},
+    {n:"فيكتور غيوكيريس", r:88, t:"good"}, {n:"بيدرو نيتو", r:84, t:"good"}, {n:"جواو فيليكس", r:84, t:"good"},
+
+    // --- عاديين/ضعاف (Bad) - 100 لاعب ---
+    {n:"مارتين برايثوايت", r:68, t:"bad"}, {n:"ماريانو دياز", r:67, t:"bad"}, {n:"لوكا يوفيتش", r:72, t:"bad"},
+    {n:"خيسي رودريجيز", r:65, t:"bad"}, {n:"ويلفريد بوني", r:64, t:"bad"}, {n:"سيدو دومبيا", r:66, t:"bad"},
+    {n:"ديفوك أوريجي", r:73, t:"bad"}, {n:"ستيفان شوبرت", r:62, t:"bad"}, {n:"واناما", r:63, t:"bad"},
+    {n:"ماريو بالوتيلي", r:72, t:"bad"}, {n:"سيباستيان جيوفينكو", r:70, t:"bad"}, {n:"أليكس باتو", r:69, t:"bad"},
+    {n:"روبيرتو سولدادو", r:68, t:"bad"}, {n:"ألفارو نيغريدو", r:69, t:"bad"}, {n:"فرناندو لورينتي", r:67, t:"bad"},
+    {n:"جيانلوكا لابادولا", r:71, t:"bad"}, {n:"ستيفانو أوكاكا", r:66, t:"bad"}, {n:"سيموني زازا", r:65, t:"bad"},
+    {n:"مباي دياني", r:67, t:"bad"}, {n:"نيكولا كالينيتش", r:68, t:"bad"}, {n:"ماتيا ديسترو", r:69, t:"bad"},
+    {n:"روبرتو إنجليسي", r:67, t:"bad"}, {n:"كيفن لاسانيا", r:70, t:"bad"}, {n:"ليوناردو بوفوليني", r:66, t:"bad"},
+    {n:"فيديريكو سانتاندير", r:64, t:"bad"}, {n:"غريغوار ديفريل", r:70, t:"bad"}, {n:"غابرييل باربوسا", r:71, t:"bad"},
+    {n:"لوسيانو فييتو", r:68, t:"bad"}, {n:"جويل فيلتمان", r:69, t:"bad"}, {n:"ساندرو راميريز", r:67, t:"bad"},
+    {n:"منير الحدادي", r:70, t:"bad"}, {n:"كريستيان تيو", r:66, t:"bad"}, {n:"إسحاق كوينكا", r:61, t:"bad"},
+    {n:"بويان كركيتش", r:65, t:"bad"}, {n:"جيرارد ديلوفيو", r:72, t:"bad"}, {n:"أداما تراوري", r:74, t:"bad"},
+    {n:"خيسوس خيمينيز", r:62, t:"bad"}, {n:"روبن بينا", r:63, t:"bad"}, {n:"بورخا ماجورال", r:73, t:"bad"},
+    {n:"راؤول دي توماس", r:74, t:"bad"}, {n:"خوسيلو", r:76, t:"bad"}, {n:"أنخيل رودريغيز", r:67, t:"bad"},
+    {n:"لويس موريال", r:69, t:"bad"}, {n:"إريك لاميلا", r:73, t:"bad"}, {n:"سيرجيو أراوخو", r:64, t:"bad"},
+    {n:"جون أوجو", r:60, t:"bad"}, {n:"فيديريكو ماكيدا", r:61, t:"bad"}, {n:"جوزي ألتيدور", r:62, t:"bad"},
+    {n:"عمر جابر", r:63, t:"bad"}, {n:"موسى سو", r:64, t:"bad"}, {n:"إيمانويل إيمينيكي", r:63, t:"bad"},
+    {n:"روبين ريشينا", r:62, t:"bad"}, {n:"كونور ويكهام", r:61, t:"bad"}, {n:"دارين بينت", r:60, t:"bad"},
+    {n:"ريكاردو لافورت", r:59, t:"bad"}, {n:"سيدريك باكامبو", r:72, t:"bad"}, {n:"عمر السومة", r:73, t:"bad"},
+    {n:"ناصر الشمراني", r:61, t:"bad"}, {n:"مهند عسيري", r:58, t:"bad"}, {n:"نايف هزازي", r:57, t:"bad"},
+    {n:"محمد السهلاوي", r:62, t:"bad"}, {n:"عبد الرزاق حمد الله", r:75, t:"bad"}, {n:"بافيتيمبي غوميز", r:72, t:"bad"},
+    {n:"لوسيانو", r:58, t:"bad"}, {n:"فابيو بوريني", r:67, t:"bad"}, {n:"عادل تاعرابت", r:71, t:"bad"},
+    {n:"نور الدين أمرابط", r:70, t:"bad"}, {n:"أحمد موسى", r:69, t:"bad"}, {n:"يانيك بولاسي", r:68, t:"bad"},
+    {n:"عمر نيااسي", r:62, t:"bad"}, {n:"بريان رويز", r:67, t:"bad"}, {n:"سيموني بيبي", r:63, t:"bad"},
+    {n:"فابيو كوالياريلا", r:74, t:"bad"}, {n:"أنطونيو دي ناتالي", r:76, t:"bad"}, {n:"ماسيمو ماكاروني", r:62, t:"bad"},
+    {n:"رولاندو بيانكي", r:60, t:"bad"}, {n:"دافيدي لانزافامي", r:58, t:"bad"}, {n:"أمبرتو بوكياتي", r:56, t:"bad"},
+    {n:"باولو سيرجيو", r:57, t:"bad"}, {n:"خوان إتوربي", r:64, t:"bad"}, {n:"سيموردي", r:55, t:"bad"},
+    {n:"لورينزو ميلغاريخو", r:62, t:"bad"}, {n:"ماتياس فيدرا", r:63, t:"bad"}, {n:"أنتوني موديست", r:71, t:"bad"},
+    {n:"سيمون زازا", r:64, t:"bad"}, {n:"روبي كين", r:65, t:"bad"}, {n:"جيرمان ديفو", r:66, t:"bad"},
+    {n:"بيتر كراوتش", r:68, t:"bad"}, {n:"ريكاردو فاز تي", r:59, t:"bad"}, {n:"ريكاردو زيلر", r:58, t:"bad"},
+    {n:"إسماعيل مطر", r:62, t:"bad"}, {n:"إسماعيل بوزيد", r:55, t:"bad"}, {n:"حمزة البصري", r:54, t:"bad"},
+    {n:"ماتيوس كونه", r:74, t:"bad"}, {n:"بريان خيل", r:69, t:"bad"}, {n:"كارلوس فينيسيوس", r:70, t:"bad"},
+    {n:"نيكولاس بيبي", r:73, t:"bad"}, {n:"أنور الغازي", r:70, t:"bad"}, {n:"سيموني زازا", r:65, t:"bad"}
+  ],
+MID: [
+    // --- نجوم (Good) - 100 لاعب ---
+    {n:"كيفين دي بروين", r:96, t:"good"}, {n:"لوكا مودريتش", r:94, t:"good"}, {n:"توني كروس", r:93, t:"good"},
+    {n:"جود بيلينجهام", r:94, t:"good"}, {n:"رودري", r:94, t:"good"}, {n:"بيدري", r:91, t:"good"},
+    {n:"فالفيردي", r:91, t:"good"}, {n:"برونو فيرنانديز", r:92, t:"good"}, {n:"إلكاي جوندوجان", r:89, t:"good"},
+    {n:"نجولو كانتي", r:89, t:"good"}, {n:"جمال موسيالا", r:92, t:"good"}, {n:"نيكولو باريللا", r:90, t:"good"},
+    {n:"ديكلان رايس", r:91, t:"good"}, {n:"مارتن أوديجارد", r:91, t:"good"}, {n:"ألكسيس ماك أليستر", r:89, t:"good"},
+    {n:"دومينيك سوبوسلاي", r:88, t:"good"}, {n:"جوشوا كيميش", r:90, t:"good"}, {n:"ليون غوريتسكا", r:87, t:"good"},
+    {n:"فرانكي دي يونغ", r:90, t:"good"}, {n:"جافي", r:88, t:"good"}, {n:"أوريلين تشواميني", r:88, t:"good"},
+    {n:"إدوارد كامافينجا", r:89, t:"good"}, {n:"برونو جيمارايش", r:88, t:"good"}, {n:"ساندرو تونالي", r:87, t:"good"},
+    {n:"كريستيان إريكسن", r:85, t:"good"}, {n:"كاسيميرو", r:89, t:"good"}, {n:"ماسون ماウント", r:84, t:"good"},
+    {n:"جيمس ماديسون", r:86, t:"good"}, {n:"لوكاس باكيتا", r:87, t:"good"}, {n:"جواو بالينيا", r:87, t:"good"},
+    {n:"كونراد لايمير", r:84, t:"good"}, {n:"مارسيل سابيتسر", r:84, t:"good"}, {n:"هاكان تشالهان أوغلو", r:89, t:"good"},
+    {n:"هنريك مخيتاريان", r:83, t:"good"}, {n:"بيوتر زيلينسكي", r:84, t:"good"}, {n:"سيرجي ميلينكوفيتش سافيتش", r:87, t:"good"},
+    {n:"روبن نيفيز", r:85, t:"good"}, {n:"فابيان رويز", r:85, t:"good"}, {n:"ماركو فيراتي", r:88, t:"good"},
+    {n:"لورينزو بيليغريني", r:85, t:"good"}, {n:"برايان كريستانته", r:82, t:"good"}, {n:"ماتيو كوفاتشيتش", r:86, t:"good"},
+    {n:"جورجينيو", r:86, t:"good"}, {n:"غران تشاكا", r:87, t:"good"}, {n:"توني كروس", r:93, t:"good"},
+    {n:"توماس بارتي", r:85, t:"good"}, {n:"يوري تيليمانس", r:84, t:"good"}, {n:"جيمس وارد بروس", r:83, t:"good"},
+    {n:"جون مكجين", r:82, t:"good"}, {n:"دوجلاس لويز", r:86, t:"good"}, {n:"اميل هويبرج", r:83, t:"good"},
+    {n:"رودريغو بينتانكور", r:84, t:"good"}, {n:"ديان كولوسيفسكي", r:85, t:"good"}, {n:"بيدرو جونسالفيس", r:84, t:"good"},
+    {n:"أوتافيو", r:83, t:"good"}, {n:"غونزالو غيديش", r:81, t:"good"}, {n:"رافاييل غيريرو", r:85, t:"good"},
+    {n:"جوليان براندت", r:86, t:"good"}, {n:"إيمري جان", r:83, t:"good"}, {n:"باستيان شفاينشتايجر", r:91, t:"good"},
+    {n:"تشافي هيرنانديز", r:97, t:"good"}, {n:"أندريس إنييستا", r:97, t:"good"}, {n:"زين الدين زيدان", r:96, t:"good"},
+    {n:"أندريا بيرلو", r:95, t:"good"}, {n:"بول سكولز", r:93, t:"good"}, {n:"ستيفن جيرارد", r:94, t:"good"},
+    {n:"فرانك لامبارد", r:94, t:"good"}, {n:"كاكا", r:96, t:"good"}, {n:"رونالدينيو", r:98, t:"good"},
+    {n:"كلارينس سيدورف", r:91, t:"good"}, {n:"يايا توريه", r:92, t:"good"}, {n:"باتريك فييرا", r:93, t:"good"},
+    {n:"روي كين", r:91, t:"good"}, {n:"كلود ماكيليلي", r:91, t:"good"}, {n:"إدغار ديفيدز", r:90, t:"good"},
+    {n:"غاييزمنديتا", r:88, t:"good"}, {n:"خوان رومان ريكيلمي", r:92, t:"good"}, {n:"بافل نيدفيد", r:93, t:"good"},
+    {n:"دي فيكيو", r:82, t:"good"}, {n:"سيسك فابريغاس", r:90, t:"good"}, {n:"مسعود أوزيل", r:91, t:"good"},
+    {n:"دافيد سيلفا", r:92, t:"good"}, {n:"خوان ماتا", r:87, t:"good"}, {n:"ساندي كازورلا", r:88, t:"good"},
+    {n:"شواستيان رودي", r:78, t:"good"}, {n:"كيفين بواتينغ", r:82, t:"good"}, {n:"أرتورو فيدال", r:89, t:"good"},
+    {n:"كلاوديو ماركيزيو", r:86, t:"good"}, {n:"آرون رامزي", r:83, t:"good"}, {n:"جاك ويلشير", r:84, t:"good"},
+    {n:"بوبي تشارلتون", r:95, t:"good"}, {n:"بوبي روبسون", r:85, t:"good"}, {n:"زين الدين زيدان", r:96, t:"good"},
+    {n:"صبري لاموشي", r:80, t:"good"}, {n:"أحمد حسن", r:86, t:"good"}, {n:"محمد أبو تريكة", r:89, t:"good"},
+    {n:"حازم إمام", r:85, t:"good"}, {n:"التفاشي", r:80, t:"good"}, {n:"نواف التمياط", r:84, t:"good"},
+    {n:"سعيد العويران", r:87, t:"good"}, {n:"يونس محمود", r:85, t:"good"}, {n:"نشأت أكرم", r:83, t:"good"},
+
+    // --- عاديين/ضعاف (Bad) - 100 لاعب ---
+    {n:"داني درينكووتر", r:63, t:"bad"}, {n:"آرثر ميلو", r:70, t:"bad"}, {n:"تيموي باكايوكو", r:67, t:"bad"},
+    {n:"توم كليفرلي", r:65, t:"bad"}, {n:"جوفري كوندوجبيا", r:72, t:"bad"}, {n:"فابيان ديلف", r:64, t:"bad"},
+    {n:"جيلسون فيرنانديز", r:66, t:"bad"}, {n:"جاك رودويل", r:61, t:"bad"}, {n:"ماريو ماريو", r:58, t:"bad"},
+    {n:"لوكاس لوكاس", r:59, t:"bad"}, {n:"ساندرو ساندرو", r:60, t:"bad"}, {n:"أندريا بيرتولاتشي", r:63, t:"bad"},
+    {n:"ريكاردو مونتوليفو", r:71, t:"bad"}, {n:"جوسيبي روسي", r:72, t:"bad"}, {n:"ألبيرتو أكويلاني", r:68, t:"bad"},
+    {n:"أنطونيو نوتشيرينو", r:64, t:"bad"}, {n:"كيفين كونستانت", r:62, t:"bad"}, {n:"سولي مونتاري", r:65, t:"bad"},
+    {n:"مايكل إيسيان", r:72, t:"bad"}, {n:"جون أوبي ميكيل", r:70, t:"bad"}, {n:"فيكتور موسيس", r:73, t:"bad"},
+    {n:"داني درينكووتر", r:63, t:"bad"}, {n:"توم كارول", r:60, t:"bad"}, {n:"رايان ميسون", r:61, t:"bad"},
+    {n:"نالبنتولي", r:57, t:"bad"}, {n:"شارلي آدام", r:64, t:"bad"}, {n:"جاي بارلي", r:56, t:"bad"},
+    {n:"لوكاس بيليا", r:71, t:"bad"}, {n:"ماتيو بوليتانو", r:74, t:"bad"}, {n:"والتر غارجانو", r:65, t:"bad"},
+    {n:"دييجو لاكسالت", r:67, t:"bad"}, {n:"غاستون راميريز", r:66, t:"bad"}, {n:"ناهيتان نانديز", r:72, t:"bad"},
+    {n:"ماتياس فيسينو", r:73, t:"bad"}, {n:"روبيرتو جاليارديني", r:69, t:"bad"}, {n:"جواو ماريو", r:74, t:"bad"},
+    {n:"دالبرت هنريكي", r:64, t:"bad"}, {n:"أنطونيو كاندريفا", r:75, t:"bad"}, {n:"إيفان بيريشيتش", r:79, t:"bad"},
+    {n:"بورخا فاليرو", r:68, t:"bad"}, {n:"ماتيا فيتشينو", r:67, t:"bad"}, {n:"دانييلي دي روسي", r:78, t:"bad"},
+    {n:"أليساندرو فلورينزي", r:74, t:"bad"}, {n:"خافيير باستوري", r:70, t:"bad"}, {n:"غريغور كريخوفياك", r:69, t:"bad"},
+    {n:"يوهان كاباي", r:68, t:"bad"}, {n:"موسى سيسوكو", r:71, t:"bad"}, {n:"كابويه", r:70, t:"bad"},
+    {n:"بنتالييب", r:65, t:"bad"}, {n:"نابي كيتا", r:72, t:"bad"}, {n:"أليكس أوكسلايد تشامبرلين", r:73, t:"bad"},
+    {n:"جوردان هندرسون", r:76, t:"bad"}, {n:"جيمس ميلنر", r:75, t:"bad"}, {n:"آدم لالانا", r:71, t:"bad"},
+    {n:"لوكاس ليفا", r:70, t:"bad"}, {n:"شارلي أدم", r:62, t:"bad"}, {n:"جاي سبيرنج", r:58, t:"bad"},
+    {n:"جوي بارتون", r:64, t:"bad"}, {n:"لي كاترمول", r:61, t:"bad"}, {n:"جاك كولباك", r:60, t:"bad"},
+    {n:"كارلوس سانشيز", r:63, t:"bad"}, {n:"إدريسا غاي", r:74, t:"bad"}, {n:"مورغان شنايدرلين", r:66, t:"bad"},
+    {n:"فكتور بانيغا", r:75, t:"bad"}, {n:"فرناندو غاغو", r:68, t:"bad"}, {n:"إيفر بانيغا", r:74, t:"bad"},
+    {n:"خافيير ماسكيرانو", r:76, t:"bad"}, {n:"لوكاس بيليا", r:70, t:"bad"}, {n:"إركسون كوريا", r:57, t:"bad"},
+    {n:"غابرييل أوبيرتان", r:61, t:"bad"}, {n:"بيبي", r:62, t:"bad"}, {n:"دارشون", r:55, t:"bad"},
+    {n:"كريستيان غامبوا", r:59, t:"bad"}, {n:"سيدريك ماكيادي", r:58, t:"bad"}, {n:"ماركو مارين", r:64, t:"bad"},
+    {n:"لويس ألبيرتو", r:77, t:"bad"}, {n:"سيرجي سيرجي", r:56, t:"bad"}, {n:"أندرياس بيريرا", r:71, t:"bad"},
+    {n:"جيسي لينغارد", r:72, t:"bad"}, {n:"خوان ماتا", r:73, t:"bad"}, {n:"نيمانيا ماتيتش", r:74, t:"bad"},
+    {n:"مروان فيلايني", r:73, t:"bad"}, {n:"أندير هيريرا", r:75, t:"bad"}, {n:"باول بوجبا", r:77, t:"bad"},
+    {n:"فريد", r:74, t:"bad"}, {n:"سكونت", r:54, t:"bad"}, {n:"كاسيميرو الفاشل", r:60, t:"bad"},
+    {n:"رودريغو دي بول الوهمي", r:62, t:"bad"}, {n:"حسام عور", r:73, t:"bad"}, {n:"تونس اللاعب", r:56, t:"bad"},
+    {n:"محمود عبد المنعم كهربا", r:71, t:"bad"}, {n:"عبد الله السعيد", r:72, t:"bad"}, {n:"وليد سليمان", r:70, t:"bad"},
+    {n:"عمرو السولية", r:72, t:"bad"}, {n:"حسام عاشور", r:68, t:"bad"}, {n:"محمد النني", r:71, t:"bad"}
+  ],
+DEF: [
+    // --- نجوم (Good) - 200 لاعب ---
+    {n:"فيرجيل فان دايك", r:95, t:"good"}, {n:"سيرجيو راموس", r:92, t:"good"}, {n:"روبن دياز", r:93, t:"good"},
+    {n:"أنطونيو روديجر", r:91, t:"good"}, {n:"أشرف حكيمي", r:90, t:"good"}, {n:"ترينت أرنولد", r:89, t:"good"},
+    {n:"داني كارفاخال", r:90, t:"good"}, {n:"ماركينيوس", r:90, t:"good"}, {n:"ديفيد ألابا", r:88, t:"good"},
+    {n:"تيو هيرنانديز", r:91, t:"good"}, {n:"جول كوندي", r:89, t:"good"}, {n:"رونالد أراوخو", r:90, t:"good"},
+    {n:"ويليام ساليبا", r:91, t:"good"}, {n:"جابرييل ماجالهايس", r:89, t:"good"}, {n:"كايل ووكر", r:89, t:"good"},
+    {n:"جون ستونز", r:90, t:"good"}, {n:"جوسكو جفارديول", r:90, t:"good"}, {n:"ناثان آكي", r:87, t:"good"},
+    {n:"أندرو روبيرتسون", r:89, t:"good"}, {n:"إبراهيما كوناتي", r:88, t:"good"}, {n:"بين وايت", r:87, t:"good"},
+    {n:"أولكسندر زينتشينكو", r:85, t:"good"}, {n:"كريستيان روميرو", r:88, t:"good"}, {n:"ميكي فان دي فين", r:87, t:"good"},
+    {n:"بيدرو بورو", r:86, t:"good"}, {n:"ديستني أودوجي", r:85, t:"good"}, {n:"يسبر باسي", r:83, t:"good"},
+    {n:"فيكتور ليندلوف", r:81, t:"good"}, {n:"ليساندرو مارتينيز", r:88, t:"good"}, {n:"رافائيل فاران", r:89, t:"good"},
+    {n:"لوك شو", r:86, t:"good"}, {n:"ديوغو دالوت", r:84, t:"good"}, {n:"هاري ماجواير", r:82, t:"good"},
+    {n:"أليساندرو باستوني", r:90, t:"good"}, {n:"فيديريكو ديماركو", r:89, t:"good"}, {n:"بنجامين بافارد", r:87, t:"good"},
+    {n:"ماتيو داريان", r:82, t:"good"}, {n:"فرانشيسكو أتشيربي", r:85, t:"good"}, {n:"ستيفان دي فري", r:86, t:"good"},
+    {n:"ثيو هيرنانديز", r:91, t:"good"}, {n:"دافيدي كالابريا", r:83, t:"good"}, {n:"فيكايو توموري", r:87, t:"good"},
+    {n:"بيير كالولو", r:82, t:"good"}, {n:"مالك ثياو", r:81, t:"good"}, {n:"سيمون كير", r:83, t:"good"},
+    {n:"غليسون بريمير", r:88, t:"good"}, {n:"دانيلو", r:84, t:"good"}, {n:"أليكس ساندرو", r:81, t:"good"},
+    {n:"فيديريكو غاتي", r:83, t:"good"}, {n:"أندريا كامبياسو", r:84, t:"good"}, {n:"جيوفاني دي لورينزو", r:88, t:"good"},
+    {n:"أمير رحماني", r:84, t:"good"}, {n:"خوان جيسوس", r:80, t:"good"}, {n:"ماريو هيرموسو", r:83, t:"good"},
+    {n:"أكسيل فيتسل", r:84, t:"good"}, {n:"ستيفان سافيتش", r:83, t:"good"}, {n:"خوسيه ماريا خيمينيز", r:85, t:"good"},
+    {n:"سيزار أزبيليكويتا", r:83, t:"good"}, {n:"مات هوملز", r:86, t:"good"}, {n:"نيكلاس زولي", r:84, t:"good"},
+    {n:"نيكو شلوتربيك", r:86, t:"good"}, {n:"جوليان ريرسون", r:81, t:"good"}, {n:"رافاييل غيريرو", r:85, t:"good"},
+    {n:"جوناثان تاه", r:87, t:"good"}, {n:"إدموند تابسوبا", r:85, t:"good"}, {n:"أوديلون كوسونو", r:83, t:"good"},
+    {n:"جيريمي فريمبونغ", r:89, t:"good"}, {n:"أليخاندرو بالدي", r:84, t:"good"}, {n:"جواو كانسيلو", r:88, t:"good"},
+    {n:"إريك غارسيا", r:81, t:"good"}, {n:"جيرارد بيكيه", r:90, t:"good"}, {n:"كارليس بويول", r:94, t:"good"},
+    {n:"داني ألفيس", r:93, t:"good"}, {n:"جوردي ألبا", r:89, t:"good"}, {n:"خافيير ماسكيرانو", r:88, t:"good"},
+    {n:"بيبي", r:88, t:"good"}, {n:"مارسيلو", r:90, t:"good"}, {n:"روبرتو كارلوس", r:94, t:"good"},
+    {n:"باولو مالديني", r:96, t:"good"}, {n:"فابيو كانافارو", r:95, t:"good"}, {n:"أليساندرو نيستا", r:94, t:"good"},
+    {n:"فرانكو باريزي", r:95, t:"good"}, {n:"غايتانو شيريا", r:94, t:"good"}, {n:"أندريا بارزالي", r:89, t:"good"},
+    {n:"جورج كيليني", r:92, t:"good"}, {n:"ليوناردو بونوتشي", r:91, t:"good"}, {n:"فيليب لام", r:93, t:"good"},
+    {n:"جيروم بواتينغ", r:89, t:"good"}, {n:"لوسيو", r:91, t:"good"}, {n:"تياغو سيلفا", r:92, t:"good"},
+    {n:"صامويل أومتيتي", r:82, t:"good"}, {n:"كليمون لينجليه", r:80, t:"good"}, {n:"لوكاس هيرنانديز", r:86, t:"good"},
+    {n:"بنجامين ميندي", r:81, t:"good"}, {n:"كورت زوما", r:82, t:"good"}, {n:"مامادو ساكو", r:79, t:"good"},
+    {n:"لوران كوشيلني", r:86, t:"good"}, {n:"بير ميرتساكر", r:83, t:"good"}, {n:"توماس فيرمايلين", r:82, t:"good"},
+    {n:"باكاري سانيا", r:84, t:"good"}, {n:"غاييل كليشي", r:83, t:"good"}, {n:"أشلي كول", r:91, t:"good"},
+    {n:"نيمانيا فيديتش", r:93, t:"good"}, {n:"ريو فيرديناند", r:93, t:"good"}, {n:"باتريس إيفرا", r:90, t:"good"},
+    {n:"غاري نيفيل", r:87, t:"good"}, {n:"جون تيري", r:93, t:"good"}, {n:"اليكس كارفاليو", r:82, t:"good"},
+    {n:"برانيسلاف إيفانوفيتش", r:88, t:"good"}, {n:"آشلي كول", r:90, t:"good"}, {n:"ريكاردو كارفاليو", r:90, t:"good"},
+    {n:"فينسنت كومباني", r:91, t:"good"}, {n:"بابلو زاباليتا", r:86, t:"good"}, {n:"ألكسندر كولاروف", r:85, t:"good"},
+    {n:"جوليان ليسكوت", r:82, t:"good"}, {n:"مايك ريتشاردز", r:81, t:"good"}, {n:"ناثان ناثان", r:78, t:"good"},
+    {n:"ماركوس روخو", r:79, t:"good"}, {n:"فيل جونز", r:78, t:"good"}, {n:"كريس سمولينغ", r:83, t:"good"},
+    {n:"أنطونيو فالنسيا", r:86, t:"good"}, {n:"ماتيو دارميان", r:81, t:"good"}, {n:"اشلي يونغ", r:83, t:"good"},
+    {n:"ناثان آكي", r:85, t:"good"}, {n:"رييس جيمس", r:87, t:"good"}, {n:"بن تشيلويل", r:84, t:"good"},
+    {n:"تياغو سيلفا", r:90, t:"good"}, {n:"أنطونيو روديجر", r:91, t:"good"}, {n:"أندرياس كريستنسن", r:86, t:"good"},
+    {n:"سيزار أزبيليكويتا", r:86, t:"good"}, {n:"مارك كوكوريلا", r:83, t:"good"}, {n:"مالو غوستو", r:82, t:"good"},
+    {n:"ليني يورو", r:84, t:"good"}, {n:"جان كلير توديبو", r:85, t:"good"}, {n:"نايف أكرد", r:84, t:"good"},
+    {n:"رومان سايس", r:82, t:"good"}, {n:"مهدي بن عطية", r:86, t:"good"}, {n:"نصير مزراوي", r:84, t:"good"},
+    {n:"سفيان أمرابط", r:85, t:"good"}, {n:"أحمد حجازي", r:83, t:"good"}, {n:"محمد عبد المنعم", r:82, t:"good"},
+    {n:"علي معلول", r:85, t:"good"}, {n:"ياسر الشهراني", r:82, t:"good"}, {n:"سعود عبد الحميد", r:83, t:"good"},
+    {n:"علي البليهي", r:81, t:"good"}, {n:"حسن تمبكتي", r:82, t:"good"}, {n:"وليد عبد الله", r:78, t:"good"},
+
+    // --- عاديين/ضعاف (Bad) - 200 لاعب ---
+    {n:"هاري ماجواير", r:70, t:"bad"}, {n:"فيل جونز", r:62, t:"bad"}, {n:"شكودران موستافي", r:65, t:"bad"},
+    {n:"كليمون لينجليه", r:71, t:"bad"}, {n:"إلياكيم مانجالا", r:64, t:"bad"}, {n:"ألبرتو مورينو", r:68, t:"bad"},
+    {n:"تيلو كيرير", r:70, t:"bad"}, {n:"فيكتور ليندلوف", r:72, t:"bad"}, {n:"إريك بايلي", r:69, t:"bad"},
+    {n:"ماركوس روخو", r:67, t:"bad"}, {n:"كريس سمولينغ", r:73, t:"bad"}, {n:"جوني إيفانز", r:71, t:"bad"},
+    {n:"براندون ويليامز", r:63, t:"bad"}, {n:"تيموثي فوسو منساه", r:61, t:"bad"}, {n:"أكسيل توانزيبي", r:64, t:"bad"},
+    {n:"فيكتور فالديس", r:66, t:"bad"}, {n:"ماتيو دارميان", r:68, t:"bad"}, {n:"ماركوس ألونسو", r:72, t:"bad"},
+    {n:"إيمرسون بالميري", r:69, t:"bad"}, {n:"دافيدي زاباكوستا", r:67, t:"bad"}, {n:"تيموي باكايوكو", r:65, t:"bad"},
+    {n:"داني درينكووتر", r:62, t:"bad"}, {n:"باب بابا سواري", r:58, t:"bad"}, {n:"باتريك فان أنهولت", r:69, t:"bad"},
+    {n:"مارتن كيلي", r:61, t:"bad"}, {n:"سكوت دان", r:64, t:"bad"}, {n:"جيمس تومكينز", r:65, t:"bad"},
+    {n:"جو ورد", r:57, t:"bad"}, {n:" ناثان كلاين", r:68, t:"bad"}, {n:"جول أندرسن", r:60, t:"bad"},
+    {n:"ماما ساكو", r:66, t:"bad"}, {n:"جويل وارد", r:63, t:"bad"}, {n:"تيريك ميتشل", r:69, t:"bad"},
+    {n:"مارك غيهي", r:73, t:"bad"}, {n:"جواو أندرسن", r:70, t:"bad"}, {n:"ناثان فيرغسون", r:59, t:"bad"},
+    {n:"أنتوني كاسيريس", r:56, t:"bad"}, {n:"ريان سيسينيون", r:67, t:"bad"}, {n:"داني روز", r:65, t:"bad"},
+    {n:"سيرج أورييه", r:71, t:"bad"}, {n:"كايل واكر بيترز", r:70, t:"bad"}, {n:"بن ديفيس", r:72, t:"bad"},
+    {n:"إيريك داير", r:71, t:"bad"}, {n:"دافينسون سانشيز", r:72, t:"bad"}, {n:"جيس تانغانغا", r:64, t:"bad"},
+    {n:"مات دوهيرتي", r:70, t:"bad"}, {n:"إيمرسون رويال", r:71, t:"bad"}, {n:"كليمنت لينجليه", r:72, t:"bad"},
+    {n:"جو رودون", r:66, t:"bad"}, {n:"يان فيرتونغن", r:74, t:"bad"}, {n:"توبي ألديرفيلد", r:75, t:"bad"},
+    {n:"داني بينيس", r:58, t:"bad"}, {n:"سيباستيان كوايتس", r:63, t:"bad"}, {n:"فابريسيو كولوتشيني", r:66, t:"bad"},
+    {n:"مايك موري", r:55, t:"bad"}, {n:"ستيفن تايلور", r:60, t:"bad"}, {n:"بول دوميت", r:62, t:"bad"},
+    {n:"تشارلز نوزويا", r:57, t:"bad"}, {n:"فيديريكو فيرنانديز", r:67, t:"bad"}, {n:"دانيال أجي", r:56, t:"bad"},
+    {n:"جمال لاسيلس", r:68, t:"bad"}, {n:"ديفيد ييدلين", r:65, t:"bad"}, {n:"خافيير مانكيلو", r:66, t:"bad"},
+    {n:"سياران كلارك", r:64, t:"bad"}, {n:"فلوريان لوريان", r:63, t:"bad"}, {n:"إسحاق هايدن", r:62, t:"bad"},
+    {n:"فابيان شار", r:74, t:"bad"}, {n:"إميل كرافت", r:65, t:"bad"}, {n:"بول كوير", r:58, t:"bad"},
+    {n:"مات تارجيت", r:69, t:"bad"}, {n:"بيورن إنجيلز", r:61, t:"bad"}, {n:"جيمس تشيستر", r:60, t:"bad"},
+    {n:"أحمد المحمدي", r:64, t:"bad"}, {n:"نايل تايلور", r:59, t:"bad"}, {n:"فريدريك غيلبيرت", r:62, t:"bad"},
+    {n:"توم هويتون", r:57, t:"bad"}, {n:"كونسسا", r:55, t:"bad"}, {n:"كورتني هاوس", r:63, t:"bad"},
+    {n:"إزري كونسا", r:73, t:"bad"}, {n:"تايرون مينغز", r:74, t:"bad"}, {n:"مات تارجيت", r:68, t:"bad"},
+    {n:"بيورن إنجيلز", r:62, t:"bad"}, {n:"داني سمبسون", r:61, t:"bad"}, {n:"روبرت هوث", r:65, t:"bad"},
+    {n:"ويس مورجان", r:64, t:"bad"}, {n:"كريستيان فوكس", r:66, t:"bad"}, {n:"ريان بيرتراند", r:68, t:"bad"},
+    {n:"سيدريك سواريس", r:69, t:"bad"}, {n:"يانا بيدناريك", r:71, t:"bad"}, {n:"جاك ستيفنز", r:66, t:"bad"},
+    {n:"مايا يوشيدا", r:67, t:"bad"}, {n:"جوز فونتي", r:68, t:"bad"}, {n:"رايان بيرتراند", r:69, t:"bad"},
+    {n:"مات تارجيت", r:67, t:"bad"}, {n:"سفيان شاكلا", r:57, t:"bad"}, {n:"راميرو فونيس موري", r:63, t:"bad"},
+    {n:"أشلي ويليامز", r:65, t:"bad"}, {n:"سيموس كولمان", r:72, t:"bad"}, {n:"ليتون بينز", r:73, t:"bad"},
+    {n:"فيل جاغيلكا", r:66, t:"bad"}, {n:"جوليان ليسكوت", r:64, t:"bad"}, {n:"بريان أوفييدو", r:61, t:"bad"},
+    {n:"ميسون هولغيت", r:68, t:"bad"}, {n:"مايكل كين", r:70, t:"bad"}, {n:"جونجو شيلفي", r:66, t:"bad"},
+    {n:"فيديريكو فازيو", r:64, t:"bad"}, {n:"خوان خوان", r:56, t:"bad"}, {n:"غونزالو رودريغيز", r:63, t:"bad"},
+    {n:"نيكولا ميلينكوفيتش", r:73, t:"bad"}, {n:"لوكاس مارتينيز كوارتا", r:70, t:"bad"}, {n:"كريستيانو بيراغي", r:71, t:"bad"},
+    {n:"لورنزو دي فيلвестري", r:62, t:"bad"}, {n:"دافيدي أستوري", r:69, t:"bad"}, {n:"غونزالو غونزالو", r:55, t:"bad"},
+    {n:"أليساندرو باستور", r:58, t:"bad"}, {n:"ماتيا كالدارا", r:65, t:"bad"}, {n:"أندريا كونتي", r:62, t:"bad"},
+    {n:"إغنازيو أباتي", r:66, t:"bad"}, {n:"ماتيا دي شيليو", r:67, t:"bad"}, {n:"كريستيان زاباتا", r:64, t:"bad"},
+    {n:"غابرييل باليتي", r:60, t:"bad"}, {n:"فيليب ميكسيس", r:63, t:"bad"}, {n:"دانييلي بونيرا", r:58, t:"bad"},
+    {n:"ألو مسباح", r:57, t:"bad"}, {n:"تاي تاي", r:56, t:"bad"}, {n:"جانلوكا زامبروتا", r:68, t:"bad"},
+    {n:"أليساندرو نستا الشبيه", r:59, t:"bad"}, {n:"جوسيبي بيافا", r:57, t:"bad"}, {n:"أندريه دياز", r:60, t:"bad"},
+    {n:"ستيفان رادو", r:67, t:"bad"}, {n:"لويس بيدرو كافاندا", r:58, t:"bad"}, {n:"أنتونيو كاندريفا الفاشل", r:61, t:"bad"},
+    {n:"باولو كانافارو", r:61, t:"bad"}, {n:"هوغو كامبانيا", r:62, t:"bad"}, {n:"ميغيل بريتوس", r:60, t:"bad"},
+    {n:"جانلوجا جرافا", r:56, t:"bad"}, {n:"سالفاتوري أرونيكا", r:57, t:"bad"}, {n:"كريستيان ماجيو", r:65, t:"bad"},
+    {n:"باولو إنريكي", r:58, t:"bad"}, {n:"إيفان سترينيتش", r:63, t:"bad"}, {n:"فاوزي غولام", r:68, t:"bad"},
+    {n:"فيديريكو فازيو", r:62, t:"bad"}, {n:"خوان جيسوس", r:64, t:"bad"}, {n:"برونو بيريس", r:65, t:"bad"},
+    {n:"فيكتور هوغو", r:59, t:"bad"}, {n:"ميلان بوريجان", r:56, t:"bad"}, {n:"عبد الله الحافظ", r:58, t:"bad"},
+    {n:"محمد جحفلي", r:61, t:"bad"}, {n:"أسامة هوساوي", r:65, t:"bad"}, {n:"عمر هوساوي", r:62, t:"bad"},
+    {n:"حسن كادش", r:63, t:"bad"}, {n:"زياد الصحفي", r:60, t:"bad"}, {n:"سعيد المولد", r:59, t:"bad"},
+    {n:"محمد البريك", r:68, t:"bad"}, {n:"حمد اليامي", r:61, t:"bad"}, {n:"خليفة الدوسري", r:60, t:"bad"}
+  ],
+GK: [
+    // --- نجوم (Good) - 50 حارساً ---
+    {n:"تيبو كورتوا", r:95, t:"good"}, {n:"أليسون بيكر", r:95, t:"good"}, {n:"مانويل نوير", r:93, t:"good"},
+    {n:"إيدرسون", r:93, t:"good"}, {n:"ياسين بونو", r:90, t:"good"}, {n:"يان أوبلاك", r:91, t:"good"},
+    {n:"جيانلويجي دوناروما", r:91, t:"good"}, {n:"مارك أندريه تير شتيجن", r:92, t:"good"}, {n:"مايك ماينان", r:90, t:"good"},
+    {n:"إيمليانو مارتينيز", r:90, t:"good"}, {n:"كيفين تراب", r:89, t:"good"}, {n:"أندريه أونانا", r:89, t:"good"},
+    {n:"ديفيد دي خيا", r:88, t:"good"}, {n:"هوجو لوريس", r:88, t:"good"}, {n:"فويتشيخ تشيسني", r:87, t:"good"},
+    {n:"بيتر شمايكل", r:95, t:"good"}, {n:"جانلويجي بوفون", r:100, t:"good"}, {n:"إيكر كاسياس", r:96, t:"good"},
+    {n:"أوليفر كان", r:101, t:"good"}, {n:"مانويل نوير", r:95, t:"good"}, {n:"بيتر تشيك", r:94, t:"good"},
+    {n:"إدوين فان دير سار", r:94, t:"good"}, {n:"فيكتور فالديز", r:89, t:"good"}, {n:"كيلور نافاس", r:89, t:"good"},
+    {n:"يان سومر", r:88, t:"good"}, {n:"أرون رامسديل", r:85, t:"good"}, {n:"ديفيد رايا", r:88, t:"good"},
+    {n:"غولييلمو فيكاريو", r:87, t:"good"}, {n:"جورج بيتروفيتش", r:83, t:"good"}, {n:"جوردان بيكفورد", r:85, t:"good"},
+    {n:"نيك بوب", r:86, t:"good"}, {n:"دين هندرسون", r:83, t:"good"}, {n:"بريند لينو", r:84, t:"good"},
+    {n:"لوكاس هراديكي", r:85, t:"good"}, {n:"أليكس ميريت", r:85, t:"good"}, {n:"جريجور كوبيل", r:88, t:"good"},
+    {n:"مانويل نويير الأقمار", r:82, t:"good"}, {n:"ألفونس أريولا", r:83, t:"good"}, {n:"باو لوبيز", r:82, t:"good"},
+    {n:"أنتوني لوبيز", r:84, t:"good"}, {n:"ستيف مانداندا", r:83, t:"good"}, {n:"إدوارد ميندي", r:86, t:"good"},
+    {n:"محمد الشناوي", r:84, t:"good"}, {n:"ياسين بونو", r:90, t:"good"}, {n:"منير محجوبي", r:80, t:"good"},
+    {n:"روم روف", r:81, t:"good"}, {n:"كلاوديو برافو الأسطورة", r:85, t:"good"}, {n:"كارلوس كاميني", r:82, t:"good"},
+    {n:"مارك ماركيز", r:79, t:"good"}, {n:"بدر بانون الحارس", r:78, t:"good"},
+
+    // --- عاديين/ضعاف (Bad) - 50 حارساً ---
+    {n:"لوريس كاريوس", r:62, t:"bad"}, {n:"كيبا أريزابالاجا", r:73, t:"bad"}, {n:"أدريان", r:66, t:"bad"},
+    {n:"كلاوديو برافو", r:69, t:"bad"}, {n:"روبرتو خيمينيز", r:60, t:"bad"}, {n:"سيمون مينيوليه", r:71, t:"bad"},
+    {n:"فيكتور فالديز العجوز", r:68, t:"bad"}, {n:"ويلي كاباييرو", r:67, t:"bad"}, {n:"جو هارت", r:70, t:"bad"},
+    {n:"فرايزر فورستر", r:68, t:"bad"}, {n:"أليكس مكارثي", r:65, t:"bad"}, {n:"واين هينيسي", r:64, t:"bad"},
+    {n:"روب روت", r:61, t:"bad"}, {n:"زيلكو كالاش", r:58, t:"bad"}, {n:"براد غوزان", r:63, t:"bad"},
+    {n:"تيم هاوارد العجوز", r:66, t:"bad"}, {n:"ستيف ماننون", r:60, t:"bad"}, {n:"فيتو مانوني", r:63, t:"bad"},
+    {n:"ماركو سيلفيستري", r:67, t:"bad"}, {n:"روبن أولسن", r:66, t:"bad"}, {n:"كارل دارلو", r:62, t:"bad"},
+    {n:"مارك غيليسبي", r:57, t:"bad"}, {n:"فريدي وودمان", r:61, t:"bad"}, {n:"بين فيستر", r:56, t:"bad"},
+    {n:"أوليكسي كوشيلينكو", r:55, t:"bad"}, {n:"داني وورد", r:64, t:"bad"}, {n:"حارس مرمى تايلاندي", r:53, t:"bad"},
+    {n:"أندريس بالوب الفاشل", r:59, t:"bad"}, {n:"استيبان ألفارادو", r:62, t:"bad"}, {n:"دافيد بروناس", r:56, t:"bad"},
+    {n:"توماس ستراكوشا", r:69, t:"bad"}, {n:"بيبي رينا المتراجع", r:70, t:"bad"}, {n:"ماتيا بيرين", r:72, t:"bad"},
+    {n:"إميليانو فيفيانو", r:65, t:"bad"}, {n:"سالفاتوري سيريغو", r:68, t:"bad"}, {n:"أنطونيو ميرانتي", r:66, t:"bad"},
+    {n:"روبين بيلتران", r:54, t:"bad"}, {n:"خوان بابلو كاريزو", r:61, t:"bad"}, {n:"ألبيرتو بوميني", r:57, t:"bad"},
+    {n:"غابرييل باسيل", r:55, t:"bad"}, {n:"بريدراج راجكوفيتش", r:71, t:"bad"}, {n:"ماركو دميتروفتش", r:68, t:"bad"},
+    {n:"أوناي سيمون الاحتياطي", r:74, t:"bad"}, {n:"باو لوبيز", r:69, t:"bad"}, {n:"فرناندو باتشيكو", r:67, t:"bad"},
+    {n:"ألفارو فرنانديز", r:63, t:"bad"}, {n:"جوردي ماسيب", r:66, t:"bad"}, {n:"روبن يانيز", r:60, t:"bad"},
+    {n:"شريف إكرامي", r:65, t:"bad"}, {n:"محمد عواد", r:67, t:"bad"}
+  ],
+COACH: [
+    // --- نجوم (Good) - 20 مدرباً ---
+    {n:"بيب جوارديولا", r:99, t:"good"}, {n:"كارلو أنشيلوتي", r:98, t:"good"}, {n:"يورجن كلوب", r:97, t:"good"},
+    {n:"زين الدين زيدان", r:96, t:"good"}, {n:"جوزيه مورينيو", r:92, t:"good"}, {n:"دييغو سيميوني", r:93, t:"good"},
+    {n:"ماكس أليغري", r:90, t:"good"}, {n:"أنطونيو كونتي", r:91, t:"good"}, {n:"لويس إنريكي", r:92, t:"good"},
+    {n:"ميكيل أرتيتا", r:90, t:"good"}, {n:"تشافي هيرنانديز", r:88, t:"good"}, {n:"يان بييرو غاسبريني", r:89, t:"good"},
+    {n:"سيموني إنزاغي", r:91, t:"good"}, {n:"لوتشيانو سباليتي", r:90, t:"good"}, {n:"جوليان ناغلسمان", r:89, t:"good"},
+    {n:"أوناي إيمري", r:91, t:"good"}, {n:"توماس توخل", r:90, t:"good"}, {n:"إريك تن هاغ", r:86, t:"good"},
+    {n:"ستيفانو بيولي", r:87, t:"good"}, {n:"السر أليكس فيرغسون", r:99, t:"good"},
+
+    // --- عاديين/ضعاف (Bad) - 20 مدرباً ---
+    {n:"مدرب محلي", r:55, t:"bad"}, {n:"مدرب هواة", r:45, t:"bad"}, {n:"مدرب مؤقت", r:50, t:"bad"},
+    {n:"فرانك دي بور", r:60, t:"bad"}, {n:"غاري نيفيل (مدرب)", r:58, t:"bad"}, {n:"فابيو كانافارو (مدرب)", r:62, t:"bad"},
+    {n:"تيري هنري (مدرب)", r:61, t:"bad"}, {n:"أندريا بيرلو (مدرب)", r:63, t:"bad"}, {n:"جوارديولا المزيف", r:52, t:"bad"},
+    {n:"مساعد المدرب", r:54, t:"bad"}, {n:"رجل بلا خبرة", r:40, t:"bad"}, {n:"مدرب قطاع الناشئين", r:57, t:"bad"},
+    {n:"فينتشينزو مونتيلا", r:65, t:"bad"}, {n:"والتر ماتزاري", r:64, t:"bad"}, {n:"ماركو جامباولو", r:62, t:"bad"},
+    {n:"رودي غارسيا", r:68, t:"bad"}, {n:"جون توماس", r:53, t:"bad"}, {n:"إيهاب جلال", r:66, t:"bad"},
+    {n:"حسام حسن (مدرب)", r:67, t:"bad"}, {n:"مدرب تحت الاختبار", r:48, t:"bad"}
+  ]
+};
+
+const CARDS_TYPES = [
+  {id:"red", name:"كارت الطرد 🟥"},
+  {id:"sub", name:"كارت التبديل 🔄"}
+];
+
+let usedPlayers = new Set();
+let isProcessingTurn = false;
+let matchInterval = null;
+let matchScriptEvents = [];
+let currentMatchTime = 0;
+let matchStage = 'regular'; // 'regular', 'extra', 'penalties'
+
+let state = {
+  teams: [
+    { name:"", fmt:"", slots:[], players:[], coach:null, cards:[], score:0, penScore: null },
+    { name:"", fmt:"", slots:[], players:[], coach:null, cards:[], score:0, penScore: null }
+  ],
+  draftQueue: [],
+  currentStep: 0,
+  boxesData: [],
+  openedBoxIdx: -1
+};
+
+const $ = id => document.getElementById(id);
+const wait = ms => new Promise(r => setTimeout(r, ms));
+
+function showToast(msg) {
+  let t = $('toast'); t.innerText = msg; t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none'; }, 2500);
+}
+
+function showEventModal(title, subtitle, emoji) {
+  $('event-modal-content').innerHTML = `<div class="emoji">${emoji}</div><h2>${title}</h2><p>${subtitle}</p>`;
+  $('event-modal').classList.add('active');
+}
+function hideEventModal() { $('event-modal').classList.remove('active'); }
+
+function triggerFx(type, tIdx) {
+  let overlay = $('fx-overlay');
+  overlay.innerHTML = '';
+
+  if (type === 'goal') {
+    let direction = (tIdx === 0) ? 'ltr' : 'rtl';
+    let ball = document.createElement('div');
+    ball.className = `fx-ball ${direction === 'ltr' ? 'anim-ltr' : 'anim-rtl'}`;
+    ball.innerText = '⚽';
+    ball.style.top = '45%';
+
+    let txt = document.createElement('div');
+    txt.className = 'fx-text anim-save';
+    txt.innerText = '⚽ هـــــدف عـالـمـي!';
+
+    overlay.appendChild(ball);
+    overlay.appendChild(txt);
+  } else if (type === 'save') {
+    let container = document.createElement('div');
+    container.className = 'anim-save';
+    container.style.cssText = 'position:relative; display:flex; flex-direction:column; align-items:center;';
+
+    let ball = document.createElement('div');
+    ball.className = 'fx-ball';
+    ball.style.position = 'relative';
+    ball.innerHTML = '⚽<span class="save-cross">❌</span>';
+
+    let txt = document.createElement('div');
+    txt.className = 'fx-text';
+    txt.style.cssText = 'position:relative; margin-top:20px; border-color:var(--red); color:var(--red);';
+    txt.innerText = '🧤 تصدي خرافي!';
+
+    container.appendChild(ball);
+    container.appendChild(txt);
+    overlay.appendChild(container);
+  }
+
+  setTimeout(() => { overlay.innerHTML = ''; }, 1600);
+}
+
+function calculateCoordinates(fmt) {
+  let parts = fmt.split('-').map(Number);
+  let coords = [];
+  coords.push({ x: 50, y: 11 });
+
+  let defs = parts[0];
+  for(let i=0; i<defs; i++) coords.push({ x: (100 / (defs + 1)) * (i + 1), y: 30 });
+
+  let mids = parts.length === 4 ? parts[1] + parts[2] : parts[1];
+  for(let i=0; i<mids; i++) coords.push({ x: (100 / (mids + 1)) * (i + 1), y: 58 });
+
+  let atts = parts[parts.length-1];
+  for(let i=0; i<atts; i++) coords.push({ x: (100 / (atts + 1)) * (i + 1), y: 85 });
+
+  return coords;
+}
+
+function buildSlotsFromFormat(fmt) {
+  let parts = fmt.split('-').map(Number);
+  let slots = [];
+  slots.push({cat:'GK', label:'حارس المرمى'});
+  for(let i=0; i<parts[0]; i++) slots.push({cat:'DEF', label:`مدافع ${i+1}`});
+  let midCount = parts.length === 4 ? parts[1] + parts[2] : parts[1];
+  for(let i=0; i<midCount; i++) slots.push({cat:'MID', label:`وسط ${i+1}`});
+  let attCount = parts[parts.length-1];
+  for(let i=0; i<attCount; i++) slots.push({cat:'ATT', label:`مهاجم ${i+1}`});
+  return slots;
+}
+
+function initDraft() {
+  state.teams[0].name = $('t1-name').value || 'الفريق الأول';
+  state.teams[0].fmt = $('t1-fmt').value;
+  state.teams[0].slots = buildSlotsFromFormat(state.teams[0].fmt);
+  state.teams[0].players = new Array(11).fill(null); state.teams[0].cards = [];
+
+  state.teams[1].name = $('t2-name').value || 'الفريق الثاني';
+  state.teams[1].fmt = $('t2-fmt').value;
+  state.teams[1].slots = buildSlotsFromFormat(state.teams[1].fmt);
+  state.teams[1].players = new Array(11).fill(null); state.teams[1].cards = [];
+
+  $('p1-title').innerText = `👈 ${state.teams[0].name}`;
+  $('p2-title').innerText = `👉 ${state.teams[1].name}`;
+
+  state.draftQueue = [];
+  for(let i=0; i<11; i++) {
+    state.draftQueue.push({ teamIdx: 0, slot: state.teams[0].slots[i], slotIdx: i });
+    state.draftQueue.push({ teamIdx: 1, slot: state.teams[1].slots[i], slotIdx: i });
+  }
+  state.draftQueue.push({ teamIdx: 0, slot: {cat:'COACH', label:'المدرب'}, slotIdx: -1 });
+  state.draftQueue.push({ teamIdx: 1, slot: {cat:'COACH', label:'المدرب'}, slotIdx: -1 });
+
+  state.currentStep = 0;
+  usedPlayers.clear();
+
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $('screen-arena').classList.add('active');
+
+  renderPitches();
+  renderTurn();
+}
+
+function renderPitches(flash) {
+  [0, 1].forEach(tIdx => {
+    let team = state.teams[tIdx];
+    let pitchEl = $(`pitch-${tIdx+1}`);
+    let dotsLayer = pitchEl.querySelector('.dots-layer');
+    dotsLayer.innerHTML = '';
+
+    let coords = calculateCoordinates(team.fmt);
+
+    team.players.forEach((p, idx) => {
+      if (!p) return;
+      let c = coords[idx] || {x:50, y:50};
+      let dot = document.createElement('div');
+      dot.className = `player-dot ${p.isRedCarded ? 'red-carded' : ''} ${flash ? 'pop' : ''}`;
+      dot.style.left = `${c.x}%`;
+      dot.style.bottom = `${c.y}%`;
+      dot.innerHTML = `<div class="node">${p.data.r}</div><div class="p-name">${p.data.n}</div>`;
+      dotsLayer.appendChild(dot);
+    });
+
+    if (team.coach) {
+      $(`coach-${tIdx+1}`).innerText = `👨‍💼 المدرب: ${team.coach.n} (⭐${team.coach.r})`;
+    }
+  });
+}
+
+function renderTurn() {
+  isProcessingTurn = false;
+  $('boxes-container').style.pointerEvents = 'auto';
+
+  if (state.currentStep >= state.draftQueue.length) {
+    return processEndCards();
+  }
+
+  let step = state.draftQueue[state.currentStep];
+  let team = state.teams[step.teamIdx];
+
+  $('turn-team-title').innerText = team.name;
+  $('turn-team-title').style.color = step.teamIdx === 0 ? "var(--blue)" : "var(--gold)";
+  $('turn-pos-desc').innerText = `اختيار: ${step.slot.label}`;
+  $('deal-actions').style.display = 'none';
+
+  state.openedBoxIdx = -1;
+  state.boxesData = generateBoxes(step.slot.cat, step.teamIdx);
+  renderBoxesUI();
+}
+
+function generateBoxes(cat, teamIdx) {
+  let boxes = [];
+  let team = state.teams[teamIdx];
+  let turnChosen = new Set();
+
+  let canCard = cat !== 'COACH' && Math.random() < 0.22;
+  let cardBoxIdx = canCard ? Math.floor(Math.random() * 4) : -1;
+
+  for (let i = 0; i < 4; i++) {
+    if (i === cardBoxIdx) {
+      let availCards = CARDS_TYPES.filter(c => !team.cards.includes(c.id));
+      if (availCards.length > 0) {
+        let card = availCards[Math.floor(Math.random() * availCards.length)];
+        let p = getRandomUniquePlayer(cat, turnChosen);
+        turnChosen.add(p.n); usedPlayers.add(p.n);
+        boxes.push({ type: 'card', cardData: card, player: p });
+        continue;
+      }
+    }
+    let p = getRandomUniquePlayer(cat, turnChosen);
+    turnChosen.add(p.n); usedPlayers.add(p.n);
+    boxes.push({ type: 'player', player: p });
+  }
+  return boxes;
+}
+
+function getRandomUniquePlayer(cat, turnSet) {
+  let list = DB[cat].filter(p => !usedPlayers.has(p.n) && !turnSet.has(p.n));
+  if (list.length === 0) return { n: `لاعب ${cat} الممتاز`, r: 80 };
+  return list[Math.floor(Math.random() * list.length)];
+}
+
+function renderBoxesUI() {
+  const container = $('boxes-container');
+  container.innerHTML = '';
+  state.boxesData.forEach((box, i) => {
+    let div = document.createElement('div');
+    div.className = 'box';
+    div.innerHTML = `<div class="num">صندوق ${i+1}</div><div class="icon">📦</div><div class="name">مغلق</div>`;
+    div.onclick = () => onBoxClick(i);
+    container.appendChild(div);
+  });
+}
+
+async function onBoxClick(idx) {
+  if (isProcessingTurn) return;
+
+  let boxesElems = document.querySelectorAll('.box');
+
+  if (state.openedBoxIdx === -1) {
+    state.openedBoxIdx = idx;
+    let bData = state.boxesData[idx];
+    boxesElems[idx].classList.add('opened');
+
+    if (bData.type === 'card') {
+      boxesElems[idx].innerHTML = `<div class="icon">🎁</div><div class="name">كارت البنك</div>`;
+    } else {
+      boxesElems[idx].innerHTML = `<div class="icon">🏃</div><div class="name">${bData.player.n}</div><div class="rating">⭐ ${bData.player.r}</div>`;
+    }
+    $('deal-actions').style.display = 'block';
+  } else if (state.openedBoxIdx !== idx) {
+    isProcessingTurn = true;
+    $('boxes-container').style.pointerEvents = 'none';$('deal-actions').style.display = 'none';
+    await finalizeChoice(idx);
+  }
+}
+
+async function acceptDeal() {
+  if (isProcessingTurn) return;
+  isProcessingTurn = true;
+  $('boxes-container').style.pointerEvents = 'none';$('deal-actions').style.display = 'none';
+  await finalizeChoice(state.openedBoxIdx);
+}
+
+async function finalizeChoice(chosenIdx) {
+  let boxesElems = document.querySelectorAll('.box');
+  let step = state.draftQueue[state.currentStep];
+  let team = state.teams[step.teamIdx];
+  let oppTeam = state.teams[step.teamIdx === 0 ? 1 : 0];
+  let chosenData = state.boxesData[chosenIdx];
+
+  for (let i = 0; i < 4; i++) {
+    let bData = state.boxesData[i];
+    let el = boxesElems[i];
+    el.className = 'box' + (i === chosenIdx ? ' opened' : ' missed');
+
+    if (bData.type === 'card') {
+      el.innerHTML = `<div class="icon">💳</div><div class="name" style="color:var(--red);">${bData.cardData.name}</div><div class="rating">${bData.player.n}</div>`;
+    } else {
+      el.innerHTML = `<div class="icon">🏃</div><div class="name">${bData.player.n}</div><div class="rating">⭐ ${bData.player.r}</div>`;
+    }
+  }
+
+  if (step.slot.cat === 'COACH') {
+    team.coach = chosenData.player;
+    showToast(`👨‍💼 ${chosenData.player.n} أصبح مدرب ${team.name}!`);
+    renderPitches();
+    await wait(1600);
+
+  } else if (chosenData.type === 'card') {
+    team.cards.push(chosenData.cardData.id);
+
+    if (chosenData.cardData.id === 'sub') {
+      await performFullSquadSwap(team, oppTeam, chosenData.player, step.slot, step.slotIdx);
+    } else {
+      team.players[step.slotIdx] = { cat: step.slot.cat, label: step.slot.label, data: chosenData.player, isRedCarded: false };
+      renderPitches();
+      showToast(`🎁 ${chosenData.player.n} انضم لـ ${team.name} + كارت مستقبلي: ${chosenData.cardData.name}`);
+      await wait(1700);
+    }
+
+  } else {
+    team.players[step.slotIdx] = { cat: step.slot.cat, label: step.slot.label, data: chosenData.player, isRedCarded: false };
+    renderPitches();
+    showToast(`✅ ${chosenData.player.n} ينضم لـ ${team.name}!`);
+    await wait(1600);
+  }
+
+  state.currentStep++;
+  renderTurn();
+}
+
+async function performFullSquadSwap(team, oppTeam, wonPlayer, slot, slotIdx) {
+  let dotsLayer1 = $('pitch-1').querySelector('.dots-layer');
+  let dotsLayer2 = $('pitch-2').querySelector('.dots-layer');
+  let wrapper1 = $('pitch-1').closest('.pitch-wrapper');
+  let wrapper2 = $('pitch-2').closest('.pitch-wrapper');
+
+  wrapper1.classList.add('shaking');
+  wrapper2.classList.add('shaking');
+  $('swap-flash').classList.add('active');
+  dotsLayer1.classList.add('swap-out');
+  dotsLayer2.classList.add('swap-out');
+  await wait(480);
+  wrapper1.classList.remove('shaking');
+  wrapper2.classList.remove('shaking');
+  $('swap-flash').classList.remove('active');
+
+  let alreadyAtThisSlot = oppTeam.players[slotIdx];
+
+  let tmp = team.players;
+  team.players = oppTeam.players;
+  oppTeam.players = tmp;
+
+  team.players[slotIdx] = { cat: slot.cat, label: slot.label, data: wonPlayer, isRedCarded: false };
+
+  if (alreadyAtThisSlot) {
+    oppTeam.players[slotIdx] = alreadyAtThisSlot;
+  }
+
+  renderPitches(true);
+  dotsLayer1.classList.remove('swap-out');
+  dotsLayer2.classList.remove('swap-out');
+
+  showEventModal(
+    '🔄🔥 تبديل التشكيلة الكاملة!',
+    `${team.name} بدّل تشكيلته بالكامل مع ${oppTeam.name}!\nوحصل ${team.name} أيضًا على ${wonPlayer.n} إضافة لتشكيلته الجديدة.`,
+    '🔄'
+  );
+
+  await wait(2600);
+  hideEventModal();
+}
+
+async function processEndCards() {
+  for (let t = 0; t < 2; t++) {
+    let team = state.teams[t];
+    for (let cardId of team.cards) {
+      if (cardId !== 'red') continue;
+      let pool = team.players.filter(p => !p.isRedCarded);
+      if (pool.length === 0) continue;
+
+      let victim = pool[Math.floor(Math.random() * pool.length)];
+      let victimName = victim.data.n;
+      victim.isRedCarded = true;
+      victim.data = { n: victimName, r: 0 };
+
+      renderPitches();
+      showEventModal('🟥 طرد!', `${team.name}: تم طرد ${victimName} (${victim.label})`, '🟥');
+      await wait(2300);
+      hideEventModal();
+    }
+  }
+
+  showVSScreen();
+}
+
+function showVSScreen() {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $('screen-vs').classList.add('active');
+
+  $('vs-t1-title').innerText = state.teams[0].name;
+  $('vs-t2-title').innerText = state.teams[1].name;
+
+  $('vs-pitch-1').innerHTML =$('pitch-1').innerHTML;
+  $('vs-pitch-2').innerHTML =$('pitch-2').innerHTML;
+}
+
+/* --- محاكي الأشواط والمباراة وركلات الترجيح --- */
+function startMatch() {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $('screen-match').classList.add('active');
+  $('m-log').innerHTML = '';$('m-team1').innerText = state.teams[0].name;
+  $('m-team2').innerText = state.teams[1].name;
+  $('m-score').innerText = '0 - 0';
+  $('btn-show-results').style.display = 'none';$('btn-skip-match').style.display = 'block';
+
+  state.teams[0].score = 0; state.teams[1].score = 0;
+  state.teams[0].penScore = null; state.teams[1].penScore = null;
+
+  matchStage = 'regular';
+  currentMatchTime = 0;
+  matchScriptEvents = generateMatchScript(1, 90);
+
+  if (matchInterval) clearInterval(matchInterval);
+
+  matchInterval = setInterval(async () => {
+    currentMatchTime++;
+    $('m-timer').innerText = currentMatchTime;
+
+    let ev = matchScriptEvents.find(e => e.min === currentMatchTime);
+    if (ev) {
+      processMatchEvent(ev);
+    }
+
+    // نهاية 90 دقيقة
+    if (currentMatchTime === 90 && matchStage === 'regular') {
+      if (state.teams[0].score === state.teams[1].score) {
+        matchStage = 'extra';
+        appendLogItem('save', `⏱️ <b>نهاية الوقت الأصلي بالتعادل (${state.teams[0].score}-${state.teams[1].score})! التوجه إلى الأشواط الإضافية...🔥</b>`);
+        let extraEvents = generateMatchScript(91, 120);
+        matchScriptEvents.push(...extraEvents);
+      } else {
+        finishMatch();
+      }
+    } 
+    // نهاية 120 دقيقة (الأشواط الإضافية)
+    else if (currentMatchTime === 120 && matchStage === 'extra') {
+      if (state.teams[0].score === state.teams[1].score) {
+        matchStage = 'penalties';
+        clearInterval(matchInterval);
+        appendLogItem('pen', `⚽ <b>تعادل استمر حتى الدقيقة 120! الانتقال إلى ركلات الترجيح الحاسمة 🎯</b>`);
+        await runPenaltyShootout(false);
+      } else {
+        finishMatch();
+      }
+    }
+  }, 100);
+}
+
+function generateMatchScript(startMin = 1, endMin = 90) {
+  let events = [];
+  let isExtra = endMin > 90;
+  let count = Math.floor(Math.random() * (isExtra ? 2 : 5)) + (isExtra ? 1 : 3);
+  let times = [];
+  for(let i=0; i<count; i++) times.push(Math.floor(Math.random() * (endMin - startMin)) + startMin);
+  times.sort((a,b) => a - b);
+
+  times.forEach(m => {
+    let tIdx = Math.random() > 0.5 ? 0 : 1;
+    let team = state.teams[tIdx];
+    let isGoal = Math.random() < 0.48; // معدل متوازن لخلق فرص تعادل وتمديد
+
+    let text = isGoal ? generateGoalText(team) : generateSaveText(team);
+    events.push({ min: m, tIdx, type: isGoal ? 'goal' : 'save', text });
+  });
+
+  return events;
+}
+
+function generateGoalText(team) {
+  let valid = team.players.filter(p => p && !p.isRedCarded);
+  let scorer = valid[Math.floor(Math.random() * valid.length)]?.data?.n || "اللاعب";
+  let assistList = valid.filter(p => p.data.n !== scorer);
+  let assist = assistList.length ? assistList[Math.floor(Math.random() * assistList.length)].data.n : "خط الوسط";
+
+  let templates = [
+    `تمريرة حاسمة سحرية من <b>${assist}</b> يضع بها <b>${scorer}</b> في مواجهة المرمى ليراوغ الحارس ويسجل هدفاً عالمياً! ⚽🔥`,
+    `عرضية متقنة من <b>${assist}</b> يرتقي لها <b>${scorer}</b> فوق الجميع ويوجه رأسية صاروخية سكنت الشباك! ⚽💥`,
+    `ركنية منفذة بدقة.. القادمون من الخلف! <b>${scorer}</b> يطلق قذيفة صاروخية من خارج المنطقة لا تصد ولا ترد! ⚽🚀`,
+    `هجمة مرتدة سريعة كالبرق، تبادل كرات تيكي تاكا بين <b>${assist}</b> و <b>${scorer}</b> ينتهي بهدف سينمائي! ⚽✨`,
+    `مجهود فردي خرافي! <b>${scorer}</b> يتلاعب بالدفاع ويسدد كرة لافتة في أقصى الزاوية التسعين! ⚽🎯`
+  ];
+  return templates[Math.floor(Math.random() * templates.length)];
+}
+
+function generateSaveText(team) {
+  let valid = team.players.filter(p => p && !p.isRedCarded);
+  let shooter = valid[Math.floor(Math.random() * valid.length)]?.data?.n || "المهاجم";
+
+  let templates = [
+    `صاروخية مفاجئة من <b>${shooter}</b> لكن الحارس يتصدى لها بأطراف الأصابع ويحولها لركنية ببراعة! 🧤❌`,
+    `انفراد تام للاعب <b>${shooter}</b>.. لكن الحارس يخرج في الوقت المناسب ويبعد الكرة ببسالة خيالية! 🧤⛔`,
+    `رأسية قوية جداً من <b>${shooter}</b> والحارس يستبسل ويبعدها من على خط المرمى تماماً! 🧤🚫`,
+    `تسديدة كرباجية من <b>${shooter}</b> تصطدم بالعارضة وتتحول للخارج وسوء حظ كبير! ⚽❌`
+  ];
+  return templates[Math.floor(Math.random() * templates.length)];
+}
+
+function getRandomPlayerName(team) {
+  let valid = team.players.filter(p => p && !p.isRedCarded);
+  if (valid.length === 0) return "اللاعب";
+  return valid[Math.floor(Math.random() * valid.length)].data.n;
+}
+
+/* محاكاة ركلات الترجيح */
+async function runPenaltyShootout(instant = false) {
+  let p1 = 0, p2 = 0;
+  let team1 = state.teams[0], team2 = state.teams[1];
+  appendLogItem('pen', `<b>🎯 بدء سلسلة ركلات الترجيح الحاسمة!</b>`);
+
+  let round = 1;
+  while (round <= 5 || p1 === p2) {
+    // ركلة الفريق الأول
+    let shooter1 = getRandomPlayerName(team1);
+    let goal1 = Math.random() < 0.72;
+    if (goal1) p1++;
+    appendLogItem(goal1 ? 'goal' : 'save', `<b>ركلة ${round}:</b> ${team1.name} - ${shooter1} ${goal1 ? '⚽ سجّلها ببراعة!' : '❌ أهدرها (تصدى لها الحارس)'}`);
+    if (!instant) { triggerFx(goal1 ? 'goal' : 'save', 0); await wait(800); }
+
+    // ركلة الفريق الثاني
+    let shooter2 = getRandomPlayerName(team2);
+    let goal2 = Math.random() < 0.72;
+    if (goal2) p2++;
+    appendLogItem(goal2 ? 'goal' : 'save', `<b>ركلة ${round}:</b> ${team2.name} - ${shooter2} ${goal2 ? '⚽ سجّلها ببراعة!' : '❌ أهدرها (تصدى لها الحارس)'}`);
+    if (!instant) { triggerFx(goal2 ? 'goal' : 'save', 1); await wait(800); }
+
+    // حسم النتيجة مبكراً إن أمكن خلال أول 5 ركلات أو خروج المغلوب بعد الـ5
+    if (round >= 5 && p1 !== p2) break;
+    if (round < 5) {
+      let t1Left = 5 - round, t2Left = 5 - round;
+      if (p1 > p2 + t2Left || p2 > p1 + t1Left) break;
+    }
+    round++;
+  }
+
+  state.teams[0].penScore = p1;
+  state.teams[1].penScore = p2;
+
+  let penWinner = p1 > p2 ? team1.name : team2.name;
+  appendLogItem('pen', `<b>🎉 فوز ${penWinner} بركلات الترجيح بنتيجة (${p1} - ${p2})!</b>`);
+  
+  $('m-score').innerText = `${state.teams[0].score} - ${state.teams[1].score} (${p1} - ${p2} ركلات)`;
+  finishMatch();
+}
+
+function processMatchEvent(ev) {
+  appendLogItem(ev.type, `<b>${ev.min}'</b> - ${ev.text}`);
+
+  if (ev.type === 'goal') {
+    state.teams[ev.tIdx].score++;
+    $('m-score').innerText = `${state.teams[0].score} - ${state.teams[1].score}`;
+    triggerFx('goal', ev.tIdx);
+  } else if (ev.type === 'save') {
+    triggerFx('save', ev.tIdx);
+  }
+}
+
+function appendLogItem(type, htmlContent) {
+  let log = $('m-log');
+  let div = document.createElement('div');
+  div.className = `log-item ${type}`;
+  div.innerHTML = htmlContent;
+  log.appendChild(div);
+  log.scrollTop = log.scrollHeight;
+}
+
+/* زر تخطي المباراة مع الشوطين الإضافيين وركلات الترجيح تلقائياً */
+async function skipMatch() {
+  if (matchInterval) clearInterval(matchInterval);
+
+  // تنفيذ بقية أحداث الـ 90 دقيقة
+  matchScriptEvents.forEach(ev => {
+    if (ev.min > currentMatchTime && ev.min <= 90) {
+      if (ev.type === 'goal') state.teams[ev.tIdx].score++;
+      appendLogItem(ev.type, `<b>${ev.min}'</b> - ${ev.text}`);
+    }
+  });
+
+  currentMatchTime = 90;
+  $('m-timer').innerText = "90";
+  $('m-score').innerText = `${state.teams[0].score} - ${state.teams[1].score}`;
+
+  // التحقق من الأشواط الإضافية عند التعادل
+  if (state.teams[0].score === state.teams[1].score && matchStage === 'regular') {
+    matchStage = 'extra';
+    appendLogItem('save', `⏱️ <b>تعادل في الوقت الأصلي (${state.teams[0].score}-${state.teams[1].score})! الذهاب للشوطين الإضافيين...🔥</b>`);
+    let extraEvents = generateMatchScript(91, 120);
+    extraEvents.forEach(ev => {
+      if (ev.type === 'goal') state.teams[ev.tIdx].score++;
+      appendLogItem(ev.type, `<b>${ev.min}'</b> - ${ev.text}`);
+    });
+    currentMatchTime = 120;
+    $('m-timer').innerText = "120";
+    $('m-score').innerText = `${state.teams[0].score} - ${state.teams[1].score}`;
+  }
+
+  // التحقق من ركلات الترجيح عند استمرار التعادل
+  if (state.teams[0].score === state.teams[1].score) {
+    matchStage = 'penalties';
+    appendLogItem('pen', `⚽ <b>تعادل في الشوطين الإضافيين! الانتقال لركلات الترجيح 🎯</b>`);
+    await runPenaltyShootout(true);
+  } else {
+    finishMatch();
+  }
+}
+
+function finishMatch() {
+  if (matchInterval) clearInterval(matchInterval);
+  let p1Pen = state.teams[0].penScore, p2Pen = state.teams[1].penScore;
+  let scoreText = p1Pen !== null ? `${state.teams[0].score} - ${state.teams[1].score} (${p1Pen} - ${p2Pen} ركلات ترجيح)` : `${state.teams[0].score} - ${state.teams[1].score}`;
+  
+  appendLogItem('pen', `🏆 <b>صفارة النهاية! النتيجة النهائية: ${scoreText}</b>`);
+
+  $('btn-skip-match').style.display = 'none';$('btn-show-results').style.display = 'flex';
+}
+
+function showResultsScreen() {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $('screen-results').classList.add('active');
+
+  let t1 = state.teams[0], t2 = state.teams[1];
+  let winnerText = "";
+
+  if (t1.score > t2.score) {
+    winnerText = `🏆 البطل: ${t1.name}`;
+  } else if (t2.score > t1.score) {
+    winnerText = `🏆 البطل: ${t2.name}`;
+  } else if (t1.penScore !== null && t2.penScore !== null) {
+    let penWinner = t1.penScore > t2.penScore ? t1.name : t2.name;
+    winnerText = `🏆 البطل: ${penWinner} (بركلات الترجيح ${t1.penScore}-${t2.penScore})`;
+  } else {
+    winnerText = "🤝 تعادل حماسي!";
+  }
+
+  $('winner-banner').innerText = winnerText;
+
+  let allPlayers = [...t1.players, ...t2.players].filter(p => p && !p.isRedCarded);
+  let motm = allPlayers.length ? allPlayers[Math.floor(Math.random() * allPlayers.length)] : null;
+  $('motm-banner').innerText = motm ? `⭐ رجل المباراة: ${motm.data.n} (تقييم الأداء: 9.7)` : '';
+
+  $('res-t1-name').innerText = t1.name;
+  $('res-t2-name').innerText = t2.name;
+
+  $('res-t1-list').innerHTML = t1.players.map(p => `
+    <div class="rating-row">
+      <span>${p.data.n}</span>
+      <span style="color:var(--gold); font-weight:bold;">${p.isRedCarded ? '0.0 🟥' : (Math.random()*2 + 7.8).toFixed(1)}</span>
+    </div>
+  `).join('');
+
+  $('res-t2-list').innerHTML = t2.players.map(p => `
+    <div class="rating-row">
+      <span>${p.data.n}</span>
+      <span style="color:var(--gold); font-weight:bold;">${p.isRedCarded ? '0.0 🟥' : (Math.random()*2 + 7.8).toFixed(1)}</span>
+    </div>
+  `).join('');
+}
+</script>
+</body>
+</html>

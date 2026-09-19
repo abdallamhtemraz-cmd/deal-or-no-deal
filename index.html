@@ -183,6 +183,10 @@
   .box.is-card.card-cheater .name { color: #8df0b0; }
   .box.is-card.card-nassab { border-color: #ff8a3d; background: linear-gradient(160deg, #6b2e0a, #1f0d04); }
   .box.is-card.card-nassab .name { color: #ffb67d; }
+  .box.is-card.card-protect { border-color: #2dd4bf; background: linear-gradient(160deg, #0b4a45, #04191a); }
+  .box.is-card.card-protect .name { color: #7ff0e0; }
+  .box.is-card.card-reroll { border-color: #ff6fb5; background: linear-gradient(160deg, #62103f, #1d0715); }
+  .box.is-card.card-reroll .name { color: #ffa6d3; }
 
   /* ===== الملاعب التكتيكية ===== */
   .pitches-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
@@ -214,8 +218,7 @@
     font-size: 10px; font-weight: 900; display: flex; align-items: center; justify-content: center;
     box-shadow: 0 2px 7px rgba(0,0,0,0.7); border: 2px solid #fff;
   }
-  #pitch-1 .player-dot:not(.red-carded) .node, #vs-pitch-1 .player-dot:not(.red-carded) .node { background: var(--blue); }
-  #pitch-2 .player-dot:not(.red-carded) .node, #vs-pitch-2 .player-dot:not(.red-carded) .node { background: var(--gold); }
+  .pitch .player-dot:not(.red-carded) .node { background: var(--dot, var(--gold)); }
   .player-dot .p-name { font-size: 9px; font-weight: 700; background: rgba(2,8,26,0.88); color: #fff; padding: 1px 5px; border-radius: 4px; white-space: nowrap; margin-top: 2px; }
   .player-dot.red-carded .node { background: var(--red); color: #fff; text-decoration: line-through; }
   .player-dot.red-carded::before { content:'🟥'; position:absolute; top:-10px; right:-8px; font-size:11px; }
@@ -338,6 +341,23 @@
   .pick-item:hover { border-color: var(--gold); }
   .pick-item:active { transform: scale(0.98); }
 
+  /* ===== وضع 3 فرق ===== */
+  #team-card-3 { display: none; }
+  @media (min-width: 640px) { #team-card-3 { grid-column: 1 / -1; } }
+  #btn-add-team { margin: 12px 0 0; }
+  #pitch-wrap-3 { display: none; }
+  @media (min-width: 700px) { .pitches-container.three { grid-template-columns: repeat(3, 1fr); } }
+  #pitch-1 { --dot: var(--blue); }
+  #pitch-2 { --dot: var(--gold); }
+  #pitch-3 { --dot: var(--lime); }
+  .player-dot.protected::after { content: '🛡️'; position: absolute; top: -12px; left: 50%; margin-left: 7px; font-size: 14px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.8)); }
+  .match-label { font-size: 13px; font-weight: 800; color: var(--gold); margin-bottom: 4px; }
+  .match-label:empty { display: none; }
+  .brand p.tour { color: var(--ink-dim); font-size: 13px; white-space: pre-line; }
+  .brand p.tour:empty { display: none; }
+  .pick-item:disabled { opacity: 0.45; cursor: not-allowed; }
+  .pick-item:disabled:hover { border-color: rgba(160,190,255,0.3); }
+
   /* تأثيرات وتحريكات الأهداف والتصدي */
   #fx-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 1000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
   .fx-ball { position: absolute; font-size: 70px; filter: drop-shadow(0 0 20px rgba(255,255,255,0.9)); z-index: 1001; }
@@ -402,9 +422,9 @@
         <input type="text" id="t1-name" value="real madrid">
         <label for="t1-fmt">التشكيلة</label>
         <select id="t1-fmt">
-          <option value="4-3-3" selected>4-3-3 (هجومية)</option>
+          <option value="4-3-3">4-3-3 (هجومية)</option>
           <option value="4-4-2">4-4-2 (متوازنة)</option>
-          <option value="4-2-3-1">4-2-3-1 (تكتيكية)</option>
+          <option value="4-2-3-1" selected>4-2-3-1 (تكتيكية)</option>
           <option value="3-5-2">3-5-2 (وسط قوي)</option>
         </select>
       </div>
@@ -421,11 +441,26 @@
           <option value="3-5-2">3-5-2 (وسط قوي)</option>
         </select>
       </div>
+
+      <div class="team-card" id="team-card-3" style="--team:var(--lime);">
+        <h3> الفريق الثالث </h3>
+        <label for="t3-name">اسم الفريق</label>
+        <input type="text" id="t3-name" value="liverpool">
+        <label for="t3-fmt">التشكيلة</label>
+        <select id="t3-fmt">
+          <option value="4-3-3">4-3-3 (هجومية)</option>
+          <option value="4-4-2" selected>4-4-2 (متوازنة)</option>
+          <option value="4-2-3-1">4-2-3-1 (تكتيكية)</option>
+          <option value="3-5-2">3-5-2 (وسط قوي)</option>
+        </select>
+      </div>
     </div>
+
+    <button class="btn btn-secondary" id="btn-add-team" onclick="toggleThirdTeam()">➕ إضافة فرقة أخرى</button>
 
     <div class="guide">
       <h3 class="guide-title">كروت المفاجآت</h3>
-      <p class="guide-note">في كل اختيار فيه احتمال حوالي 22% إن صندوق يبقى مخبّي كارت مع اللاعب (مش في اختيار المدرب). الكارت بيظهر بعد ما تختار، وكل فريق ياخد كل كارت مرة واحدة بس. كروت الفاجر ونو ريسك والنصاب بتشتغل في آخر المزاد قبل الماتش (الفريق الأول الأول)، وبعدهم كارت الطرد.</p>
+      <p class="guide-note">في كل اختيار فيه احتمال حوالي 22% إن صندوق يبقى مخبّي كارت مع اللاعب (مش في اختيار المدرب). الكارت بيظهر بعد ما تختار، وكل فريق ياخد كل كارت مرة واحدة بس. كارت التبديل والتالتة تبتة بيشتغلوا فوراً لما تختارهم. وفي آخر المزاد قبل الماتش الترتيب كده: كارت الحماية الأول، وبعده الفاجر ونو ريسك والنصاب (الفريق الأول الأول)، وبعدهم كارت الطرد.</p>
       <div class="guide-grid">
         <div class="gcard" style="--c:var(--red);">
           <div class="g-ico">🟥</div>
@@ -494,10 +529,32 @@
             </ul>
           </div>
         </div>
+        <div class="gcard" style="--c:#2dd4bf;">
+          <div class="g-ico">🛡️</div>
+          <div>
+            <h4>كارت الحماية</h4>
+            <ul>
+              <li>بيشتغل في آخر المزاد، وهو الأول قبل أي كارت تاني.</li>
+              <li>بتظهر تشكيلتك وإنت اللي بتختار لاعب واحد تحميه.</li>
+              <li>اللاعب المحمي مينفعش يتسرق بكارت النصاب.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="gcard" style="--c:#ff6fb5;">
+          <div class="g-ico">🎯</div>
+          <div>
+            <h4>التالتة تبتة</h4>
+            <ul>
+              <li>بيشتغل لما تختار صندوقه وتدوس Deal.</li>
+              <li>الصناديق الأربعة بتتغير بصناديق جديدة.</li>
+              <li>مبتاخدش لاعب الكارت، وتاخد اللاعب اللي تختاره من الصناديق الجديدة.</li>
+            </ul>
+          </div>
+        </div>
       </div>
       <div class="tiers">
         <div class="tier-chip t-legend"><b>أسطورة 👑</b>تقييم من 103 وأكتر</div>
-        <div class="tier-chip t-good"><b>نجم ⭐</b>تقييم من 76 لـ 101</div>
+        <div class="tier-chip t-good"><b>نجم ⭐</b>تقييم من 76 لـ 100</div>
         <div class="tier-chip t-bad"><b>عادي</b>تقييم أقل من 75</div>
       </div>
     </div>
@@ -518,7 +575,7 @@
       <button class="btn btn-primary" id="btn-deal" onclick="acceptDeal()">🤝 Deal (تأكيد الاختيار)</button>
     </div>
 
-    <div class="pitches-container">
+    <div class="pitches-container" id="pitches-container">
       <div class="pitch-wrapper">
         <div class="pitch-title" id="p1-title" style="color:var(--blue);">الملعب الأيسر</div>
         <div class="pitch" id="pitch-1">
@@ -541,14 +598,25 @@
         </div>
         <div class="coach-badge" id="coach-2">👨‍💼 المدرب: لم يحدد</div>
       </div>
+      <div class="pitch-wrapper" id="pitch-wrap-3">
+        <div class="pitch-title" id="p3-title" style="color:var(--lime);">الملعب الثالث</div>
+        <div class="pitch" id="pitch-3">
+          <div class="pmark pbox-top"></div>
+          <div class="pmark pbox-bottom"></div>
+          <div class="pmark goalbox-top"></div>
+          <div class="pmark goalbox-bottom"></div>
+          <div class="dots-layer"></div>
+        </div>
+        <div class="coach-badge" id="coach-3">👨‍💼 المدرب: لم يحدد</div>
+      </div>
     </div>
   </section>
 
   <!-- 3. الشاشة الثالثة: شاشة الـ VS الاحترافية -->
   <section class="screen" id="screen-vs">
     <div class="brand">
-      <h1>مواجهة العمالقة ⚔️</h1>
-      <p>التشكيلات مكتملة وجاهزة للمباراة!</p>
+      <h1 id="vs-title">مواجهة العمالقة ⚔️</h1>
+      <p id="vs-sub">التشكيلات مكتملة وجاهزة للمباراة!</p>
     </div>
 
     <div class="vs-container">
@@ -588,6 +656,7 @@
   <!-- 4. الشاشة الرابعة: المباراة والتعليق -->
   <section class="screen" id="screen-match">
     <div class="match-header">
+      <div class="match-label" id="match-label"></div>
       <div class="m-teams">
         <span id="m-team1">فريق 1</span>
         <span id="m-team2">فريق 2</span>
@@ -609,6 +678,7 @@
     <div class="brand">
       <h1 id="winner-banner">🏆 بطل المباراة</h1>
       <p class="motm" id="motm-banner"></p>
+      <p class="tour" id="tour-summary"></p>
     </div>
 
     <h3 class="results-title">📊 تقييمات اللاعبين الفردية:</h3>
@@ -631,6 +701,28 @@
 <script>
 const DB = {
   ATT: [
+    // --- Premium Prime Attackers - 20 players ---
+{n:"رونالدو نازاريو البرايم - Prime", r:150, t:"premium"},
+{n:"ليونيل ميسي البرايم - Prime", r:150, t:"premium"},
+{n:"كريستيانو رونالدو البرايم - Prime", r:150, t:"premium"},
+{n:"رونالدينيو البرايم - Prime", r:148, t:"premium"},
+{n:"بيليه البرايم - Prime", r:148, t:"premium"},
+{n:"دييغو مارادونا البرايم - Prime", r:147, t:"premium"},
+{n:"يوهان كرويف البرايم - Prime", r:145, t:"premium"},
+{n:"أوزيبيو البرايم - Prime", r:144, t:"premium"},
+{n:"روماريو البرايم - Prime", r:143, t:"premium"},
+{n:"رونالدو البرايم - Prime", r:142, t:"premium"},
+{n:"تييري هنري البرايم - Prime", r:141, t:"premium"},
+{n:"ماركو فان باستن البرايم - Prime", r:140, t:"premium"},
+{n:"جورج وياه البرايم - Prime", r:139, t:"premium"},
+{n:"روبرتو باجو البرايم - Prime", r:138, t:"premium"},
+{n:"ريفالدو البرايم - Prime", r:137, t:"premium"},
+{n:"أليساندرو دل بييرو البرايم - Prime", r:136, t:"premium"},
+{n:"أندري شيفتشينكو البرايم - Prime", r:135, t:"premium"},
+{n:"صامويل إيتو البرايم - Prime", r:134, t:"premium"},
+{n:"كاكا البرايم - Prime", r:132, t:"premium"},
+{n:"لويس سواريز البرايم - Prime", r:130, t:"premium"},
+    
 // --- أساطير معتزلون (Legends) - 30 لاعبا ---
   {n:"بيليه", r:120, t:"legend"}, {n:"دييغو مارادونا", r:120, t:"legend"},
   {n:"ألفريدو دي ستيفانو", r:117, t:"legend"}, {n:"رونالدو نازاريو", r:118, t:"legend"},
@@ -697,6 +789,28 @@ const DB = {
     {n:"راؤول دي توماس", r:74, t:"bad"}
   ],
 MID: [
+  // --- Premium Midfielders - 20 players ---
+{n:"زين الدين زيدان البرايم", r:150, t:"premium"},
+{n:"تشافي البرايم", r:148, t:"premium"},
+{n:"أندريس إنييستا البرايم", r:147, t:"premium"},
+{n:"لوكا مودريتش البرايم", r:145, t:"premium"},
+{n:"أندريا بيرلو البرايم", r:144, t:"premium"},
+{n:"كيفن دي بروين البرايم", r:143, t:"premium"},
+{n:"فرانك لامبارد البرايم", r:142, t:"premium"},
+{n:"ستيفن جيرارد البرايم", r:141, t:"premium"},
+{n:"بول سكولز البرايم", r:139, t:"premium"},
+{n:"كلارنس سيدورف البرايم", r:138, t:"premium"},
+{n:"ميشيل بلاتيني البرايم", r:137, t:"premium"},
+{n:"فرانشيسكو توتي البرايم", r:136, t:"premium"},
+{n:"توني كروس البرايم", r:135, t:"premium"},
+{n:"يايا توريه البرايم", r:134, t:"premium"},
+{n:"ديفيد سيلفا البرايم", r:133, t:"premium"},
+{n:"سيسك فابريغاس البرايم", r:132, t:"premium"},
+{n:"كاكا البرايم", r:131, t:"premium"},
+{n:"ريفالدو البرايم", r:130, t:"premium"},
+{n:"رود خوليت البرايم", r:140, t:"premium"},
+{n:"لوثار ماتيوس البرايم", r:139, t:"premium"},
+  
 // --- أساطير معتزلون (Legends) - 30 لاعبا ---
   {n:"تشافي هيرنانديز", r:119, t:"legend"}, {n:"أندريس إنييستا", r:119, t:"legend"},
   {n:"زين الدين زيدان", r:118, t:"legend"}, {n:"أندريا بيرلو", r:117, t:"legend"},
@@ -763,6 +877,38 @@ MID: [
     {n:"لوكاس بيليا", r:71, t:"bad"}
   ],
 DEF: [
+  // --- Premium Defenders - 30 players ---
+{n:"فرانز بيكنباور البرايم", r:150, t:"premium"},
+{n:"باولو مالديني البرايم", r:149, t:"premium"},
+{n:"سيرجيو راموس البرايم", r:148, t:"premium"},
+{n:"أليساندرو نيستا البرايم", r:147, t:"premium"},
+{n:"فابيو كانافارو البرايم", r:146, t:"premium"},
+{n:"فرانكو باريزي البرايم", r:145, t:"premium"},
+{n:"روبرتو كارلوس البرايم", r:145, t:"premium"},
+{n:"كافو البرايم", r:144, t:"premium"},
+{n:"مارسيلو البرايم", r:143, t:"premium"},
+{n:"كارليس بويول البرايم", r:142, t:"premium"},
+{n:"فيرجيل فان دايك البرايم", r:142, t:"premium"},
+{n:"جون تيري البرايم", r:141, t:"premium"},
+{n:"ريو فرديناند البرايم", r:140, t:"premium"},
+{n:"نيمانيا فيديتش البرايم", r:139, t:"premium"},
+{n:"فيليب لام البرايم", r:138, t:"premium"},
+{n:"داني ألفيس البرايم", r:137, t:"premium"},
+{n:"خافيير زانيتي البرايم", r:136, t:"premium"},
+{n:"أشلي كول البرايم", r:135, t:"premium"},
+{n:"جورجيو كيليني البرايم", r:134, t:"premium"},
+{n:"ليوناردو بونوتشي البرايم", r:133, t:"premium"},
+{n:"تياغو سيلفا البرايم", r:132, t:"premium"},
+{n:"بيبي البرايم", r:131, t:"premium"},
+{n:"ماركينيوس البرايم", r:130, t:"premium"},
+{n:"رافاييل فاران البرايم", r:130, t:"premium"},
+{n:"ديفيد ألابا البرايم", r:130, t:"premium"},
+{n:"فيرناندو هييرو البرايم", r:140, t:"premium"},
+{n:"لوسيو البرايم", r:138, t:"premium"},
+{n:"جوزيه ماريا خيمينيز البرايم", r:132, t:"premium"},
+{n:"غاري نيفيل البرايم", r:130, t:"premium"},
+{n:"إيفان كوردوبا البرايم", r:134, t:"premium"},
+  
 // --- دفاع معتزلون (Legends DEF) - 100 لاعب ---
   {n:"باولو مالديني", r:120, t:"legend"}, {n:"فرانكو باريزي", r:118, t:"legend"},
   {n:"فرانتس بيكنباور", r:120, t:"legend"}, {n:"فابيو كانافارو", r:117, t:"legend"},
@@ -882,6 +1028,23 @@ DEF: [
     {n:"أنتوني كاسيريس", r:56, t:"bad"}
   ],
 GK: [
+  // --- Premium Goalkeepers - 15 players ---
+{n:"مانويل نوير البرايم", r:150, t:"premium"},
+{n:"جانلويجي بوفون البرايم", r:149, t:"premium"},
+{n:"إيكر كاسياس البرايم", r:147, t:"premium"},
+{n:"ليف ياشين البرايم", r:146, t:"premium"},
+{n:"بيتر شمايكل البرايم", r:144, t:"premium"},
+{n:"أوليفر كان البرايم", r:143, t:"premium"},
+{n:"جيانلويجي دوناروما البرايم", r:141, t:"premium"},
+{n:"تيبو كورتوا البرايم", r:140, t:"premium"},
+{n:"أليسون بيكر البرايم", r:139, t:"premium"},
+{n:"مانويل نوير البرايم", r:138, t:"premium"},
+{n:"إدوين فان دير سار البرايم", r:137, t:"premium"},
+{n:"بيتر تشيك البرايم", r:136, t:"premium"},
+{n:"ديفيد سيمان البرايم", r:134, t:"premium"},
+{n:"كلاوديو تافاريل البرايم", r:132, t:"premium"},
+{n:"فابيان بارتيز البرايم", r:130, t:"premium"},
+  
 // --- حراس مرمى معتزلون (Legends GK) - 20 حارساً ---
   {n:"ليف ياشين", r:120, t: "legend"}, {n:"جانلويجي بوفون", r:120, t: "legend"},
   {n:"بيتر شمايكل", r:118, t: "legend"}, {n:"إيكر كاسياس", r:117, t: "legend"},
@@ -923,6 +1086,23 @@ GK: [
     {n:"ماركو سيلفيستري", r:67, t:"bad"}
   ],
 COACH: [
+  // --- Premium Coaches - 15 coaches ---
+{n:"بيب جوارديولا البرايم", r:150, t:"premium"},
+{n:"كارلو أنشيلوتي البرايم", r:149, t:"premium"},
+{n:"جوزيه مورينيو البرايم", r:148, t:"premium"},
+{n:"أليكس فيرجسون البرايم", r:150, t:"premium"},
+{n:"زين الدين زيدان البرايم", r:147, t:"premium"},
+{n:"يورغن كلوب البرايم", r:146, t:"premium"},
+{n:"أرسين فينغر البرايم", r:144, t:"premium"},
+{n:"فيسنتي ديل بوسكي البرايم", r:143, t:"premium"},
+{n:"فابيو كابيلو البرايم", r:142, t:"premium"},
+{n:"مارشيلو ليبي البرايم", r:141, t:"premium"},
+{n:"أريغو ساكي البرايم", r:140, t:"premium"},
+{n:"يوهان كرويف البرايم", r:139, t:"premium"},
+{n:"جوزيب جوارديولا البرايم", r:138, t:"premium"},
+{n:"جوزيه مورينيو البرايم", r:136, t:"premium"},
+{n:"سيموني إنزاغي البرايم", r:134, t:"premium"},
+  
 // --- مدربون معتزلون (Legends Managers) - 20 مدرباً ---
   {n:"أليكس فيرغسون", r:120, t:"legend"}, {n:"ريнус ميكيلز", r:119, t:"legend"},
   {n:"يوهان كرويف", r:118, t:"legend"}, {n:"أريغو ساكي", r:116, t:"legend"},
@@ -960,7 +1140,9 @@ const CARDS_TYPES = [
   {id:"fajer", name:"كارت الفاجر 💎", desc:"في آخر المزاد تبدّل لاعب من عندك بلاعب في نفس المركز تقييمه أعلى من 90."},
   {id:"norisk", name:"نو ريسك نو فان 🎲", desc:"في آخر المزاد تبدّل لاعب من عندك بلاعب عشوائي في نفس المركز."},
   {id:"cheater", name:"كارت الغشاش 🃏", desc:"لو فريقك خسر الماتش، بيتعاد من الأول تلقائي (مرة واحدة بس)."},
-  {id:"nassab", name:"النصاب 🕵️", desc:"في آخر المزاد تبدّل لاعب من عندك بلاعب من الفريق التاني في نفس المركز."}
+  {id:"nassab", name:"النصاب 🕵️", desc:"في آخر المزاد تبدّل لاعب من عندك بلاعب من الفريق التاني في نفس المركز."},
+  {id:"protect", name:"كارت الحماية 🛡️", desc:"في آخر المزاد (قبل أي كارت تاني) تحمي لاعب من عندك من كارت النصاب."},
+  {id:"reroll", name:"التالتة تبتة 🎯", desc:"لما تختاره الصناديق الأربعة بتتغير، وتاخد لاعبك من الصناديق الجديدة (من غير لاعب الكارت)."}
 ];
 
 let usedPlayers = new Set();
@@ -969,6 +1151,11 @@ let matchInterval = null;
 let matchScriptEvents = [];
 let currentMatchTime = 0;
 let matchStage = 'regular'; // 'regular', 'extra', 'penalties'
+let threeTeams = false;          // هل فيه فرقة تالتة؟
+let M = { a: 0, b: 1 };          // الفريقين اللي بيلعبوا الماتش الحالي
+let matchNo = 1;                 // رقم الماتش (1 = الأول، 2 = النهائي)
+const TEAM_COLORS = ['var(--blue)', 'var(--gold)', 'var(--lime)'];
+const TEAM_ICONS = ['👈', '👉', '⚡'];
 
 let state = {
   teams: [
@@ -989,6 +1176,13 @@ function showSetup() {
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   $('screen-setup').classList.add('active');
   window.scrollTo(0, 0);
+}
+
+/* زرار إضافة / إلغاء الفرقة التالتة */
+function toggleThirdTeam() {
+  threeTeams = !threeTeams;
+  $('team-card-3').style.display = threeTeams ? 'block' : 'none';
+  $('btn-add-team').innerText = threeTeams ? '➖ إلغاء الفرقة الثالثة' : '➕ إضافة فرقة أخرى';
 }
 
 /* درجة اللاعب (أسطورة / نجم / عادي) لعرضها تحت اسمه */
@@ -1084,28 +1278,32 @@ function buildSlotsFromFormat(fmt) {
 }
 
 function initDraft() {
-  state.teams[0].name = $('t1-name').value || 'الفريق الأول';
-  state.teams[0].fmt = $('t1-fmt').value;
-  state.teams[0].slots = buildSlotsFromFormat(state.teams[0].fmt);
-  state.teams[0].players = new Array(11).fill(null); state.teams[0].cards = []; state.teams[0].cheaterUsed = false;
+  const cfg = [
+    { n: 't1-name', f: 't1-fmt', def: 'الفريق الأول' },
+    { n: 't2-name', f: 't2-fmt', def: 'الفريق الثاني' },
+    { n: 't3-name', f: 't3-fmt', def: 'الفريق الثالث' }
+  ];
+  state.teams = [];
+  for (let i = 0; i < (threeTeams ? 3 : 2); i++) {
+    let fmt = $(cfg[i].f).value;
+    state.teams.push({
+      name: $(cfg[i].n).value || cfg[i].def, fmt: fmt, slots: buildSlotsFromFormat(fmt),
+      players: new Array(11).fill(null), coach: null, cards: [], score: 0, penScore: null, cheaterUsed: false
+    });
+  }
 
-  state.teams[1].name = $('t2-name').value || 'الفريق الثاني';
-  state.teams[1].fmt = $('t2-fmt').value;
-  state.teams[1].slots = buildSlotsFromFormat(state.teams[1].fmt);
-  state.teams[1].players = new Array(11).fill(null); state.teams[1].cards = []; state.teams[1].cheaterUsed = false;
-
-  $('p1-title').innerText = `👈 ${state.teams[0].name}`;
-  $('p2-title').innerText = `👉 ${state.teams[1].name}`;
+  state.teams.forEach((t, i) => { $(`p${i+1}-title`).innerText = `${TEAM_ICONS[i]} ${t.name}`; });
+  $('pitch-wrap-3').style.display = threeTeams ? 'flex' : 'none';
+  $('pitches-container').classList.toggle('three', threeTeams);
 
   state.draftQueue = [];
-  for(let i=0; i<11; i++) {
-    state.draftQueue.push({ teamIdx: 0, slot: state.teams[0].slots[i], slotIdx: i });
-    state.draftQueue.push({ teamIdx: 1, slot: state.teams[1].slots[i], slotIdx: i });
+  for (let i = 0; i < 11; i++) {
+    state.teams.forEach((t, ti) => state.draftQueue.push({ teamIdx: ti, slot: t.slots[i], slotIdx: i }));
   }
-  state.draftQueue.push({ teamIdx: 0, slot: {cat:'COACH', label:'المدرب'}, slotIdx: -1 });
-  state.draftQueue.push({ teamIdx: 1, slot: {cat:'COACH', label:'المدرب'}, slotIdx: -1 });
+  state.teams.forEach((t, ti) => state.draftQueue.push({ teamIdx: ti, slot: {cat:'COACH', label:'المدرب'}, slotIdx: -1 }));
 
   state.currentStep = 0;
+  matchNo = 1;
   usedPlayers.clear();
 
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
@@ -1116,8 +1314,7 @@ function initDraft() {
 }
 
 function renderPitches(flash) {
-  [0, 1].forEach(tIdx => {
-    let team = state.teams[tIdx];
+  state.teams.forEach((team, tIdx) => {
     let pitchEl = $(`pitch-${tIdx+1}`);
     let dotsLayer = pitchEl.querySelector('.dots-layer');
     dotsLayer.innerHTML = '';
@@ -1128,7 +1325,7 @@ function renderPitches(flash) {
       if (!p) return;
       let c = coords[idx] || {x:50, y:50};
       let dot = document.createElement('div');
-      dot.className = `player-dot ${p.isRedCarded ? 'red-carded' : ''} ${flash ? 'pop' : ''}`;
+      dot.className = `player-dot ${p.isRedCarded ? 'red-carded' : ''} ${p.protected ? 'protected' : ''} ${flash ? 'pop' : ''}`;
       dot.style.left = `${c.x}%`;
       dot.style.bottom = `${c.y}%`;
       dot.innerHTML = `<div class="node">${p.data.r}</div><div class="p-name">${p.data.n}</div>`;
@@ -1153,7 +1350,7 @@ function renderTurn() {
   let team = state.teams[step.teamIdx];
 
   $('turn-team-title').innerText = team.name;
-  $('turn-team-title').style.color = step.teamIdx === 0 ? "var(--blue)" : "var(--gold)";
+  $('turn-team-title').style.color = TEAM_COLORS[step.teamIdx];
   $('turn-pos-desc').innerText = `اختيار: ${step.slot.label}`;
   $('deal-actions').style.display = 'none';
 
@@ -1242,7 +1439,6 @@ async function finalizeChoice(chosenIdx) {
   let boxesElems = document.querySelectorAll('.box');
   let step = state.draftQueue[state.currentStep];
   let team = state.teams[step.teamIdx];
-  let oppTeam = state.teams[step.teamIdx === 0 ? 1 : 0];
   let chosenData = state.boxesData[chosenIdx];
 
   for (let i = 0; i < 4; i++) {
@@ -1269,7 +1465,14 @@ async function finalizeChoice(chosenIdx) {
     team.cards.push(chosenData.cardData.id);
 
     if (chosenData.cardData.id === 'sub') {
-      await performFullSquadSwap(team, oppTeam, chosenData.player, step.slot, step.slotIdx);
+      let target = await chooseOpponent(step.teamIdx, '🔄', chosenData.cardData.name, 'اختار الفريق اللي هتبدل تشكيلتك معاه');
+      await performFullSquadSwap(team, target, chosenData.player, step.slot, step.slotIdx);
+    } else if (chosenData.cardData.id === 'reroll') {
+      // التالتة تبتة: نفس الدور بصناديق جديدة ومن غير لاعب الكارت
+      showToast(`🎯 ${team.name} استخدم التالتة تبتة! الصناديق اتغيرت ومخدش ${chosenData.player.n}`);
+      await wait(2200);
+      renderTurn();
+      return;
     } else {
       team.players[step.slotIdx] = { cat: step.slot.cat, label: step.slot.label, data: chosenData.player, isRedCarded: false };
       renderPitches();
@@ -1289,10 +1492,11 @@ async function finalizeChoice(chosenIdx) {
 }
 
 async function performFullSquadSwap(team, oppTeam, wonPlayer, slot, slotIdx) {
-  let dotsLayer1 = $('pitch-1').querySelector('.dots-layer');
-  let dotsLayer2 = $('pitch-2').querySelector('.dots-layer');
-  let wrapper1 = $('pitch-1').closest('.pitch-wrapper');
-  let wrapper2 = $('pitch-2').closest('.pitch-wrapper');
+  let ti = state.teams.indexOf(team), oi = state.teams.indexOf(oppTeam);
+  let dotsLayer1 = $(`pitch-${ti+1}`).querySelector('.dots-layer');
+  let dotsLayer2 = $(`pitch-${oi+1}`).querySelector('.dots-layer');
+  let wrapper1 = $(`pitch-${ti+1}`).closest('.pitch-wrapper');
+  let wrapper2 = $(`pitch-${oi+1}`).closest('.pitch-wrapper');
 
   wrapper1.classList.add('shaking');
   wrapper2.classList.add('shaking');
@@ -1341,7 +1545,8 @@ function pickFromList(emoji, title, sub, items) {
     items.forEach((it, i) => {
       let b = document.createElement('button');
       b.className = 'pick-item';
-      b.innerHTML = `<span>${it.name}<br><small>${it.sub}</small></span><span class="r">⭐ ${it.r}</span>`;
+      b.disabled = !!it.disabled;
+      b.innerHTML = `<span>${it.name}<br><small>${it.sub}</small></span><span class="r">${it.tag !== undefined ? it.tag : '⭐ ' + it.r}</span>`;
       b.onclick = () => { $('pick-modal').classList.remove('active'); resolve(i); };
       list.appendChild(b);
     });
@@ -1350,7 +1555,37 @@ function pickFromList(emoji, title, sub, items) {
 }
 
 function getCardById(id) { return CARDS_TYPES.find(c => c.id === id); }
-const CARD_EMOJI = { red:'🟥', sub:'🔄', fajer:'💎', norisk:'🎲', cheater:'🃏', nassab:'🕵️' };
+const CARD_EMOJI = { red:'🟥', sub:'🔄', fajer:'💎', norisk:'🎲', cheater:'🃏', nassab:'🕵️', protect:'🛡️', reroll:'🎯' };
+
+/* اختيار الفريق المنافس (لو فيه فريقين بس بيتحدد لوحده، ولو 3 فرق بتختار) */
+async function chooseOpponent(tIdx, emoji, title, sub) {
+  let others = state.teams.filter((t, i) => i !== tIdx);
+  if (others.length === 1) return others[0];
+  let k = await pickFromList(emoji, `${state.teams[tIdx].name}: ${title}`, sub,
+    others.map(t => ({ name: t.name, sub: 'التشكيلة ' + t.fmt, tag: '👥' })));
+  return others[k];
+}
+
+/* كارت الحماية: بتختار لاعب من فريقك يبقى محمي من السرقة (كارت النصاب) */
+async function useProtectCard(t) {
+  let team = state.teams[t];
+  let card = getCardById('protect');
+  let candidates = team.players.filter(p => p && !p.isRedCarded);
+  if (candidates.length === 0) return;
+
+  let idx = await pickFromList(
+    CARD_EMOJI.protect, `${team.name}: ${card.name}`,
+    'دي تشكيلتك.. اختار اللاعب اللي عايز تحميه من السرقة',
+    candidates.map(p => ({ name: p.data.n, sub: p.label, r: p.data.r }))
+  );
+  let chosen = candidates[idx];
+  chosen.protected = true;
+
+  renderPitches(true);
+  showEventModal(card.name, `${team.name}: ${chosen.data.n} (${chosen.label}) بقى محمي من السرقة 🛡️`, CARD_EMOJI.protect);
+  await wait(2400);
+  hideEventModal();
+}
 
 /* كارت الفاجر + كارت نو ريسك نو فان: تبديل لاعب من فريقك بلاعب في نفس المركز */
 async function useReplaceCard(t, cardId) {
@@ -1384,13 +1619,14 @@ async function useReplaceCard(t, cardId) {
   hideEventModal();
 }
 
-/* كارت النصاب: تبديل لاعب من فريقك بلاعب من الفريق التاني في نفس المركز */
+/* كارت النصاب: تبديل لاعب من فريقك بلاعب من فريق تاني في نفس المركز (المحميين مينفعش يتسرقوا) */
 async function useNassabCard(t) {
   let team = state.teams[t];
-  let opp = state.teams[t === 0 ? 1 : 0];
   let card = getCardById('nassab');
 
-  let mine = team.players.filter(p => p && !p.isRedCarded);
+  let opp = await chooseOpponent(t, CARD_EMOJI.nassab, card.name, 'اختار الفريق اللي عايز تنصب عليه');
+
+  let mine = team.players.filter(p => p && !p.isRedCarded && !p.protected);
   if (mine.length === 0) return;
 
   let i = await pickFromList(
@@ -1400,14 +1636,14 @@ async function useNassabCard(t) {
   let myP = mine[i];
 
   let theirs = opp.players.filter(p => p && !p.isRedCarded && p.cat === myP.cat);
-  if (theirs.length === 0) {
-    showToast('⚠️ مفيش لاعب في نفس المركز عند الفريق التاني');
-    await wait(1600);
+  if (theirs.filter(p => !p.protected).length === 0) {
+    showToast(theirs.length ? `🛡️ لاعبين ${opp.name} في المركز ده كلهم محميين` : '⚠️ مفيش لاعب في نفس المركز عند الفريق التاني');
+    await wait(1800);
     return;
   }
   let j = await pickFromList(
     CARD_EMOJI.nassab, `${team.name}: ${card.name}`, `اختار لاعب من ${opp.name} في نفس المركز عشان تبدله بـ ${myP.data.n}`,
-    theirs.map(p => ({ name: p.data.n, sub: p.label, r: p.data.r }))
+    theirs.map(p => ({ name: p.data.n, sub: p.label, r: p.data.r, disabled: !!p.protected, tag: p.protected ? '🛡️ محمي' : undefined }))
   );
   let theirP = theirs[j];
 
@@ -1421,8 +1657,15 @@ async function useNassabCard(t) {
 }
 
 async function processEndCards() {
-  // 1) كروت الاختيار (الفاجر - نو ريسك - النصاب): الفريق الأول بعدين التاني
-  for (let t = 0; t < 2; t++) {
+  let n = state.teams.length;
+
+  // 0) كارت الحماية الأول: كل فريق معاه الكارت بيختار اللاعب اللي هيحميه قبل أي سرقة
+  for (let t = 0; t < n; t++) {
+    if (state.teams[t].cards.includes('protect')) await useProtectCard(t);
+  }
+
+  // 1) كروت الاختيار (الفاجر - نو ريسك - النصاب): بالترتيب فريق ورا فريق
+  for (let t = 0; t < n; t++) {
     let team = state.teams[t];
     for (let cardId of team.cards) {
       if (cardId === 'fajer' || cardId === 'norisk') await useReplaceCard(t, cardId);
@@ -1431,7 +1674,7 @@ async function processEndCards() {
   }
 
   // 2) كارت الطرد (الحارس مستثنى من الطرد)
-  for (let t = 0; t < 2; t++) {
+  for (let t = 0; t < n; t++) {
     let team = state.teams[t];
     for (let cardId of team.cards) {
       if (cardId !== 'red') continue;
@@ -1450,37 +1693,53 @@ async function processEndCards() {
     }
   }
 
-  showVSScreen();
+  showVSScreen(0, 1, 1);
 }
 
-function showVSScreen() {
+/* شاشة الـ VS: فريق a ضد فريق b (no = رقم الماتش) */
+function showVSScreen(a, b, no) {
+  M = { a: a, b: b };
+  matchNo = no || 1;
+
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   $('screen-vs').classList.add('active');
 
-  $('vs-t1-title').innerText = state.teams[0].name;
-  $('vs-t2-title').innerText = state.teams[1].name;
+  $('vs-title').innerText = matchNo === 1 ? 'مواجهة العمالقة ⚔️' : 'النهائي الكبير ⚔️';
+  $('vs-sub').innerText = matchNo === 1
+    ? 'التشكيلات مكتملة وجاهزة للمباراة!'
+    : `${state.teams[a].name} (الفايز) يواجه ${state.teams[b].name}`;
 
-  $('vs-pitch-1').innerHTML =$('pitch-1').innerHTML;
-  $('vs-pitch-2').innerHTML =$('pitch-2').innerHTML;
+  [a, b].forEach((tIdx, k) => {
+    let n = k + 1;
+    $(`vs-t${n}-title`).innerText = state.teams[tIdx].name;
+    $(`vs-t${n}-title`).style.color = TEAM_COLORS[tIdx];
+    $(`vs-pitch-${n}`).innerHTML = $(`pitch-${tIdx+1}`).innerHTML;
+    $(`vs-pitch-${n}`).style.setProperty('--dot', TEAM_COLORS[tIdx]);
+  });
 }
 
 /* --- محاكي الأشواط والمباراة وركلات الترجيح --- */
+
+/* فريق الماتش الحالي: side 0 = الأول، side 1 = التاني */
+function mTeam(side) { return state.teams[side === 0 ? M.a : M.b]; }
+
 function startMatch(isReplay) {
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   $('screen-match').classList.add('active');
+  $('match-label').innerText = state.teams.length === 3 ? (matchNo === 1 ? 'الماتش الأول' : 'النهائي') : '';
   if (isReplay === true) {
     appendLogItem('pen', `🔁 <b>إعادة المباراة من الأول بفضل كارت الغشاش!</b>`);
     $('m-timer').innerText = 0;
   } else {
     $('m-log').innerHTML = '';
   }
-  $('m-team1').innerText = state.teams[0].name;
-  $('m-team2').innerText = state.teams[1].name;
+  $('m-team1').innerText = mTeam(0).name;
+  $('m-team2').innerText = mTeam(1).name;
   $('m-score').innerText = '0 - 0';
   $('btn-show-results').style.display = 'none';$('btn-skip-match').style.display = 'block';
 
-  state.teams[0].score = 0; state.teams[1].score = 0;
-  state.teams[0].penScore = null; state.teams[1].penScore = null;
+  mTeam(0).score = 0; mTeam(1).score = 0;
+  mTeam(0).penScore = null; mTeam(1).penScore = null;
 
   matchStage = 'regular';
   currentMatchTime = 0;
@@ -1499,9 +1758,9 @@ function startMatch(isReplay) {
 
     // نهاية 90 دقيقة
     if (currentMatchTime === 90 && matchStage === 'regular') {
-      if (state.teams[0].score === state.teams[1].score) {
+      if (mTeam(0).score === mTeam(1).score) {
         matchStage = 'extra';
-        appendLogItem('save', `⏱️ <b>نهاية الوقت الأصلي بالتعادل (${state.teams[0].score}-${state.teams[1].score})! التوجه إلى الأشواط الإضافية...🔥</b>`);
+        appendLogItem('save', `⏱️ <b>نهاية الوقت الأصلي بالتعادل (${mTeam(0).score}-${mTeam(1).score})! التوجه إلى الأشواط الإضافية...🔥</b>`);
         let extraEvents = generateMatchScript(91, 120);
         matchScriptEvents.push(...extraEvents);
       } else {
@@ -1510,7 +1769,7 @@ function startMatch(isReplay) {
     } 
     // نهاية 120 دقيقة (الأشواط الإضافية)
     else if (currentMatchTime === 120 && matchStage === 'extra') {
-      if (state.teams[0].score === state.teams[1].score) {
+      if (mTeam(0).score === mTeam(1).score) {
         matchStage = 'penalties';
         clearInterval(matchInterval);
         appendLogItem('pen', `⚽ <b>تعادل استمر حتى الدقيقة 120! الانتقال إلى ركلات الترجيح الحاسمة 🎯</b>`);
@@ -1532,7 +1791,7 @@ function generateMatchScript(startMin = 1, endMin = 90) {
 
   times.forEach(m => {
     let tIdx = Math.random() > 0.5 ? 0 : 1;
-    let team = state.teams[tIdx];
+    let team = mTeam(tIdx);
     let isGoal = Math.random() < 0.48; // معدل متوازن لخلق فرص تعادل وتمديد
 
     let text = isGoal ? generateGoalText(team) : generateSaveText(team);
@@ -1549,36 +1808,11 @@ function generateGoalText(team) {
   let assist = assistList.length ? assistList[Math.floor(Math.random() * assistList.length)].data.n : "خط الوسط";
 
   let templates = [
-    `تمريرة بينية رائعة من <b>${assist}</b> تضع <b>${scorer}</b> منفردًا أمام المرمى، ولمسة واحدة تهز الشباك! ⚽🔥`,
-`كرة طولية مذهلة من <b>${assist}</b> خلف الدفاع، <b>${scorer}</b> يستلمها ويسددها مباشرة في الزاوية! ⚽🎯`,
-`ثنائية سريعة بين <b>${assist}</b> و<b>${scorer}</b> داخل المنطقة تنتهي بتسديدة قوية لا تُصد! ⚽💥`,
-`<b>${assist}</b> يخطف الكرة ويمررها بذكاء إلى <b>${scorer}</b> الذي ينفرد بالحارس ويسجل بهدوء! ⚽🧊`,
-`تمريرة أرضية متقنة من <b>${assist}</b> أمام المرمى، و<b>${scorer}</b> يسبق الجميع ويضعها في الشباك! ⚽🚀`,
-`عرضية مثالية من <b>${assist}</b> على رأس <b>${scorer}</b> الذي يرتقي عاليًا ويضعها في أقصى الزاوية! ⚽🔥`,
-`ركنية خطيرة من <b>${assist}</b> تصل إلى <b>${scorer}</b> على حدود المنطقة، تسديدة قوية والهدف! ⚽💣`,
-`هجمة منظمة تنتهي بتمريرة ساحرة من <b>${assist}</b> إلى <b>${scorer}</b> الذي يطلق صاروخًا في الشباك! ⚽🚀`,
-`<b>${assist}</b> يمرر كرة بالكعب بطريقة رائعة، <b>${scorer}</b> يستغلها ويسجل هدفًا استثنائيًا! ⚽✨`,
-`مراوغة رائعة من <b>${assist}</b> ثم تمريرة قاتلة إلى <b>${scorer}</b> الذي لا يرحم أمام المرمى! ⚽🔥`,
-`هجمة مرتدة خاطفة، <b>${assist}</b> ينطلق ويمرر في اللحظة المناسبة لـ<b>${scorer}</b> الذي يسجل بكل ثقة! ⚡⚽`,
-`كرة عرضية أرضية من <b>${assist}</b> تمر أمام الجميع، لكن <b>${scorer}</b> يظهر في المكان المثالي ويهز الشباك! ⚽🎯`,
-`تمريرة ذكية من <b>${assist}</b> تخترق خط الدفاع، و<b>${scorer}</b> يستلم ويسددها من لمسة واحدة! ⚽💥`,
-`<b>${assist}</b> يرسل كرة رائعة خلف المدافعين، <b>${scorer}</b> ينفرد بالحارس ويرفعها من فوقه داخل المرمى! ⚽😱`,
-`تبادل سريع للكرة بين <b>${assist}</b> و<b>${scorer}</b>، والأخير ينهي الهجمة بتسديدة لا تُصد! ⚽🔥`,
-`<b>${assist}</b> يرسل تمريرة عكسية مذهلة، <b>${scorer}</b> يسددها مباشرة في المقص وسط ذهول الجميع! ⚽🚀`,
-`تمريرة قصيرة من <b>${assist}</b> تفتح الطريق أمام <b>${scorer}</b> الذي يراوغ مدافعًا ويسدد في الزاوية! ⚽🎯`,
-`ركلة ركنية ينفذها <b>${assist}</b> بدقة، و<b>${scorer}</b> يرتقي فوق الجميع ويحولها إلى هدف رائع! ⚽💥`,
-`<b>${assist}</b> يرسل كرة طويلة خلف الدفاع، <b>${scorer}</b> يسيطر عليها بطريقة رائعة ثم يسجل! ⚽✨`,
-`هجمة مرتدة بثلاث تمريرات، آخرها من <b>${assist}</b> إلى <b>${scorer}</b> الذي ينهيها بتسديدة قوية! ⚡⚽`,
-`تمريرة بالكعب من <b>${assist}</b> تفاجئ الدفاع، <b>${scorer}</b> يستغل المساحة ويسدد في الشباك! ⚽🔥`,
-`<b>${assist}</b> يضع كرة مثالية على طبق من ذهب، و<b>${scorer}</b> لا يتردد ويطلقها في المرمى! ⚽🍽️`,
-`كرة بينية قاتلة من <b>${assist}</b>، <b>${scorer}</b> ينطلق خلف الدفاع ويسجل هدفًا عالميًا! ⚽🌟`,
-`<b>${assist}</b> يراوغ لاعبًا ثم يمررها إلى <b>${scorer}</b> الذي يسدد كرة زاحفة تسكن أسفل الزاوية! ⚽🎯`,
-`عرضية من مسافة بعيدة بواسطة <b>${assist}</b>، و<b>${scorer}</b> يقابلها بتسديدة على الطائر داخل الشباك! ⚽💥`,
-`<b>${assist}</b> يستلم الكرة على الجناح ويرسل عرضية مثالية، <b>${scorer}</b> يحولها إلى هدف برأسية قوية! ⚽🔥`,
-`تمريرة مفاجئة من <b>${assist}</b> داخل منطقة الجزاء، <b>${scorer}</b> يسبق الحارس ويسجل من لمسة واحدة! ⚽⚡`,
-`هجمة تيكي تاكا مذهلة، آخر تمريرة من <b>${assist}</b> تصل إلى <b>${scorer}</b> الذي يضع الكرة في الشباك بكل أناقة! ⚽✨`,
-`<b>${assist}</b> يرسل كرة ساقطة خلف المدافعين، <b>${scorer}</b> يسددها على الطائر بطريقة عالمية! ⚽🚀`,
-`تمريرة حاسمة من <b>${assist}</b> بعد مجهود فردي رائع، و<b>${scorer}</b> يختم الهجمة بهدف لا يُنسى! ⚽🔥`
+    `تمريرة حاسمة سحرية من <b>${assist}</b> يضع بها <b>${scorer}</b> في مواجهة المرمى ليراوغ الحارس ويسجل هدفاً عالمياً! ⚽🔥`,
+    `عرضية متقنة من <b>${assist}</b> يرتقي لها <b>${scorer}</b> فوق الجميع ويوجه رأسية صاروخية سكنت الشباك! ⚽💥`,
+    `ركنية منفذة بدقة.. القادمون من الخلف! <b>${scorer}</b> يطلق قذيفة صاروخية من خارج المنطقة لا تصد ولا ترد! ⚽🚀`,
+    `هجمة مرتدة سريعة كالبرق، تبادل كرات تيكي تاكا بين <b>${assist}</b> و <b>${scorer}</b> ينتهي بهدف سينمائي! ⚽✨`,
+    `مجهود فردي خرافي! <b>${scorer}</b> يتلاعب بالدفاع ويسدد كرة لافتة في أقصى الزاوية التسعين! ⚽🎯`
   ];
   return templates[Math.floor(Math.random() * templates.length)];
 }
@@ -1605,7 +1839,7 @@ function getRandomPlayerName(team) {
 /* محاكاة ركلات الترجيح */
 async function runPenaltyShootout(instant = false) {
   let p1 = 0, p2 = 0;
-  let team1 = state.teams[0], team2 = state.teams[1];
+  let team1 = mTeam(0), team2 = mTeam(1);
   appendLogItem('pen', `<b>🎯 بدء سلسلة ركلات الترجيح الحاسمة!</b>`);
 
   let round = 1;
@@ -1633,13 +1867,13 @@ async function runPenaltyShootout(instant = false) {
     round++;
   }
 
-  state.teams[0].penScore = p1;
-  state.teams[1].penScore = p2;
+  team1.penScore = p1;
+  team2.penScore = p2;
 
   let penWinner = p1 > p2 ? team1.name : team2.name;
   appendLogItem('pen', `<b>🎉 فوز ${penWinner} بركلات الترجيح بنتيجة (${p1} - ${p2})!</b>`);
   
-  $('m-score').innerText = `${state.teams[0].score} - ${state.teams[1].score} (${p1} - ${p2} ركلات)`;
+  $('m-score').innerText = `${team1.score} - ${team2.score} (${p1} - ${p2} ركلات)`;
   finishMatch();
 }
 
@@ -1647,8 +1881,8 @@ function processMatchEvent(ev) {
   appendLogItem(ev.type, `<b>${ev.min}'</b> - ${ev.text}`);
 
   if (ev.type === 'goal') {
-    state.teams[ev.tIdx].score++;
-    $('m-score').innerText = `${state.teams[0].score} - ${state.teams[1].score}`;
+    mTeam(ev.tIdx).score++;
+    $('m-score').innerText = `${mTeam(0).score} - ${mTeam(1).score}`;
     triggerFx('goal', ev.tIdx);
   } else if (ev.type === 'save') {
     triggerFx('save', ev.tIdx);
@@ -1671,31 +1905,31 @@ async function skipMatch() {
   // تنفيذ بقية أحداث الـ 90 دقيقة
   matchScriptEvents.forEach(ev => {
     if (ev.min > currentMatchTime && ev.min <= 90) {
-      if (ev.type === 'goal') state.teams[ev.tIdx].score++;
+      if (ev.type === 'goal') mTeam(ev.tIdx).score++;
       appendLogItem(ev.type, `<b>${ev.min}'</b> - ${ev.text}`);
     }
   });
 
   currentMatchTime = 90;
   $('m-timer').innerText = "90";
-  $('m-score').innerText = `${state.teams[0].score} - ${state.teams[1].score}`;
+  $('m-score').innerText = `${mTeam(0).score} - ${mTeam(1).score}`;
 
   // التحقق من الأشواط الإضافية عند التعادل
-  if (state.teams[0].score === state.teams[1].score && matchStage === 'regular') {
+  if (mTeam(0).score === mTeam(1).score && matchStage === 'regular') {
     matchStage = 'extra';
-    appendLogItem('save', `⏱️ <b>تعادل في الوقت الأصلي (${state.teams[0].score}-${state.teams[1].score})! الذهاب للشوطين الإضافيين...🔥</b>`);
+    appendLogItem('save', `⏱️ <b>تعادل في الوقت الأصلي (${mTeam(0).score}-${mTeam(1).score})! الذهاب للشوطين الإضافيين...🔥</b>`);
     let extraEvents = generateMatchScript(91, 120);
     extraEvents.forEach(ev => {
-      if (ev.type === 'goal') state.teams[ev.tIdx].score++;
+      if (ev.type === 'goal') mTeam(ev.tIdx).score++;
       appendLogItem(ev.type, `<b>${ev.min}'</b> - ${ev.text}`);
     });
     currentMatchTime = 120;
     $('m-timer').innerText = "120";
-    $('m-score').innerText = `${state.teams[0].score} - ${state.teams[1].score}`;
+    $('m-score').innerText = `${mTeam(0).score} - ${mTeam(1).score}`;
   }
 
   // التحقق من ركلات الترجيح عند استمرار التعادل
-  if (state.teams[0].score === state.teams[1].score) {
+  if (mTeam(0).score === mTeam(1).score) {
     matchStage = 'penalties';
     appendLogItem('pen', `⚽ <b>تعادل في الشوطين الإضافيين! الانتقال لركلات الترجيح 🎯</b>`);
     await runPenaltyShootout(true);
@@ -1706,15 +1940,16 @@ async function skipMatch() {
 
 function finishMatch() {
   if (matchInterval) clearInterval(matchInterval);
-  let p1Pen = state.teams[0].penScore, p2Pen = state.teams[1].penScore;
-  let scoreText = p1Pen !== null ? `${state.teams[0].score} - ${state.teams[1].score} (${p1Pen} - ${p2Pen} ركلات ترجيح)` : `${state.teams[0].score} - ${state.teams[1].score}`;
+  let t1 = mTeam(0), t2 = mTeam(1);
+  let p1Pen = t1.penScore, p2Pen = t2.penScore;
+  let scoreText = p1Pen !== null ? `${t1.score} - ${t2.score} (${p1Pen} - ${p2Pen} ركلات ترجيح)` : `${t1.score} - ${t2.score}`;
   
   appendLogItem('pen', `🏆 <b>صفارة النهاية! النتيجة النهائية: ${scoreText}</b>`);
 
   // كارت الغشاش: لو الفريق اللي معاه الكارت خسر، الماتش بيتعاد (مرة واحدة بس)
-  let loserIdx = getLoserIdx();
-  if (loserIdx !== -1) {
-    let loser = state.teams[loserIdx];
+  let loserSide = getLoserSide();
+  if (loserSide !== -1) {
+    let loser = mTeam(loserSide);
     if (loser.cards.includes('cheater') && !loser.cheaterUsed) {
       loser.cheaterUsed = true;
       $('btn-skip-match').style.display = 'none';$('btn-show-results').style.display = 'none';
@@ -1725,23 +1960,44 @@ function finishMatch() {
     }
   }
 
+  // في وضع 3 فرق: بعد الماتش الأول الزرار بيودّي للنهائي (الفايز ضد الفريق التالت)
+  $('btn-show-results').innerText = (state.teams.length === 3 && matchNo === 1)
+    ? `⚔️ الفايز يواجه ${state.teams[2].name}`
+    : '📊 عرض تقييمات اللاعبين ورجل المباراة';
   $('btn-skip-match').style.display = 'none';$('btn-show-results').style.display = 'flex';
 }
 
-/* مين الفريق الخسران (-1 لو مفيش) */
-function getLoserIdx() {
-  let t1 = state.teams[0], t2 = state.teams[1];
+/* مين الجانب الخسران في الماتش الحالي (0 أو 1، و -1 لو مفيش) */
+function getLoserSide() {
+  let t1 = mTeam(0), t2 = mTeam(1);
   if (t1.score > t2.score) return 1;
   if (t2.score > t1.score) return 0;
   if (t1.penScore !== null && t2.penScore !== null && t1.penScore !== t2.penScore) return t1.penScore > t2.penScore ? 1 : 0;
   return -1;
 }
 
+function matchSummaryText() {
+  let a = mTeam(0), b = mTeam(1);
+  let s = `${a.name} ${a.score} - ${b.score} ${b.name}`;
+  if (a.penScore !== null && b.penScore !== null) s += ` (ركلات الترجيح ${a.penScore}-${b.penScore})`;
+  return s;
+}
+
+/* الماتش التاني: الفايز في الماتش الأول ضد الفريق التالت (بنفس أنيميشن الـ VS) */
+function goNextMatch() {
+  let loserSide = getLoserSide();
+  let winnerIdx = (loserSide === 0) ? M.b : M.a;
+  state.firstMatchText = matchSummaryText();
+  showVSScreen(winnerIdx, 2, 2);
+}
+
 function showResultsScreen() {
+  if (state.teams.length === 3 && matchNo === 1) { goNextMatch(); return; }
+
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   $('screen-results').classList.add('active');
 
-  let t1 = state.teams[0], t2 = state.teams[1];
+  let t1 = mTeam(0), t2 = mTeam(1);
   let winnerText = "";
 
   if (t1.score > t2.score) {
@@ -1756,11 +2012,19 @@ function showResultsScreen() {
   }
 
   $('winner-banner').innerText = winnerText;
+  $('tour-summary').innerText = state.teams.length === 3
+    ? `الماتش الأول: ${state.firstMatchText}\nالنهائي: ${matchSummaryText()}`
+    : '';
 
- let allPlayers = [...t1.players, ...t2.players].filter(p => p && !p.isRedCarded);
+  let allPlayers = [...t1.players, ...t2.players].filter(p => p && !p.isRedCarded);
   let motm = allPlayers.length ? allPlayers[Math.floor(Math.random() * allPlayers.length)] : null;
   $('motm-banner').innerText = motm ? `⭐ رجل المباراة: ${motm.data.n} (تقييم الأداء: 9.7)` : '';
-  
+
+  $('res-t1-name').innerText = t1.name;
+  $('res-t2-name').innerText = t2.name;
+  $('res-t1-name').style.color = TEAM_COLORS[M.a];
+  $('res-t2-name').style.color = TEAM_COLORS[M.b];
+
   $('res-t1-list').innerHTML = t1.players.map(p => `
     <div class="rating-row">
       <span>${p.data.n}</span>

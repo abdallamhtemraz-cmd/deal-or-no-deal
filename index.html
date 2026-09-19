@@ -1757,39 +1757,9 @@ function showResultsScreen() {
 
   $('winner-banner').innerText = winnerText;
 
-let allPlayers = [...t1.players, ...t2.players]
-  .filter(p => p && !p.isRedCarded);
-
-let motm = allPlayers.length
-  ? allPlayers.reduce((best, player) =>
-      (player.data.r || 0) > (best.data.r || 0) ? player : best
-    )
-  : null;
-
-$('motm-banner').innerText = motm
-  ? `⭐ رجل المباراة: ${motm.data.n} (تقييم الأداء: ${motm.data.r})`
-  : '';
-
-$('res-t1-name').innerText = t1.name;
-$('res-t2-name').innerText = t2.name;
-
-$('res-t1-list').innerHTML = t1.players.map(p => `
-  <div class="rating-row">
-    <span>${p.data.n}</span>
-    <span style="color:var(--gold); font-weight:bold;">
-      ${p.isRedCarded ? '0.0 🟥' : p.data.r}
-    </span>
-  </div>
-`).join('');
-
-$('res-t2-list').innerHTML = t2.players.map(p => `
-  <div class="rating-row">
-    <span>${p.data.n}</span>
-    <span style="color:var(--gold); font-weight:bold;">
-      ${p.isRedCarded ? '0.0 🟥' : p.data.r}
-    </span>
-  </div>
-`).join('');
+ let allPlayers = [...t1.players, ...t2.players].filter(p => p && !p.isRedCarded);
+  let motm = allPlayers.length ? allPlayers[Math.floor(Math.random() * allPlayers.length)] : null;
+  $('motm-banner').innerText = motm ? `⭐ رجل المباراة: ${motm.data.n} (تقييم الأداء: 9.7)` : '';
   
   $('res-t1-list').innerHTML = t1.players.map(p => `
     <div class="rating-row">
